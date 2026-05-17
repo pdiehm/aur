@@ -4,3 +4,6 @@
 [submodule "cmake-format"]
 	path = cmake-format
 	url = https://aur.archlinux.org/cmake-format.git
+[submodule "cmake-language-server"]
+	path = cmake-language-server
+	url = https://aur.archlinux.org/cmake-language-server.git

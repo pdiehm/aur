@@ -44,8 +44,12 @@ jobs:
       - name: Build packages
         run: |
           for pkg in */; do
-            if [[ $pkg != paru/ ]]; then
-              echo "::group::${pkg%/}"
+            pkg="${pkg%/}"
+
+            if [[ $pkg != paru ]]; then
+              echo "::group::$pkg"
+              if [[ -f $pkg.patch ]]; then env -C "$pkg" patch -p 1 < "$pkg.patch"; fi
+
               sudo -u user env -C "$pkg" paru --noconfirm --build .
               echo "::endgroup::"
             fi

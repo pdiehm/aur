@@ -1,0 +1,5 @@
+[prettier-plugin-css-order]
+source = "github"
+github = "Siilwyn/prettier-plugin-css-order"
+use_max_tag = true
+prefix = "v"

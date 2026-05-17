@@ -1,0 +1,51 @@
+on:
+  schedule:
+    - cron: "0 0 * * 6"
+
+jobs:
+  upgrade:
+    runs-on: ubuntu-latest
+
+    container:
+      image: archlinux
+
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Install packages
+        run: pacman --noconfirm --sync --refresh --sysupgrade git devtools github-cli
+
+      - uses: actions/checkout@v6.0.2
+        with:
+          submodules: true
+
+      - name: Upgrade
+        run: |
+          for pkg in */; do
+            if [[ -e $pkg/.git || ! -f $pkg/.nvchecker.toml ]]; then continue; fi
+
+            cd "$pkg"
+            pkgctl version upgrade
+            cd ..
+          done
+
+      - name: Publish
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          chown root:root .
+          git add */PKGBUILD
+
+          if ! git diff --staged --quiet; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+
+            BRANCH="upgrade-$(date "+%F" | tr -d -)"
+            git checkout -b "$BRANCH"
+
+            git commit --message "chore: upgrade"
+            git push --set-upstream origin "$BRANCH"
+            gh pr create --fill --base main --head "$BRANCH"
+          fi

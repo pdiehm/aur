@@ -28,3 +28,6 @@
 [submodule "nixfmt"]
 	path = nixfmt
 	url = https://aur.archlinux.org/nixfmt.git
+[submodule "java-language-server"]
+	path = java-language-server
+	url = https://aur.archlinux.org/java-language-server.git

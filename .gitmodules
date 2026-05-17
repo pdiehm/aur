@@ -1,3 +1,6 @@
 [submodule "paru"]
 	path = paru
 	url = https://aur.archlinux.org/paru.git
+[submodule "cmake-format"]
+	path = cmake-format
+	url = https://aur.archlinux.org/cmake-format.git

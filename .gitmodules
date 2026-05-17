@@ -19,3 +19,6 @@
 [submodule "google-java-format"]
 	path = google-java-format
 	url = https://aur.archlinux.org/google-java-format.git
+[submodule "bibtex-tidy"]
+	path = bibtex-tidy
+	url = https://aur.archlinux.org/bibtex-tidy.git

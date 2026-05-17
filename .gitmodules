@@ -7,3 +7,6 @@
 [submodule "cmake-language-server"]
 	path = cmake-language-server
 	url = https://aur.archlinux.org/cmake-language-server.git
+[submodule "prettier-plugin-xml"]
+	path = prettier-plugin-xml
+	url = https://aur.archlinux.org/prettier-plugin-xml.git

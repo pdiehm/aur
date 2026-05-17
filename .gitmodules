@@ -22,3 +22,6 @@
 [submodule "bibtex-tidy"]
 	path = bibtex-tidy
 	url = https://aur.archlinux.org/bibtex-tidy.git
+[submodule "prettier-plugin-php"]
+	path = prettier-plugin-php
+	url = https://aur.archlinux.org/prettier-plugin-php.git

@@ -1,0 +1,3 @@
+[submodule "paru"]
+	path = paru
+	url = https://aur.archlinux.org/paru.git

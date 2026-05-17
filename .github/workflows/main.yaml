@@ -1,0 +1,80 @@
+on:
+  push:
+    branches: ["main"]
+
+  schedule:
+    - cron: "0 0 * * *"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    container:
+      image: archlinux
+
+    steps:
+      - name: Install packages
+        run: pacman --noconfirm --sync --refresh --sysupgrade base-devel git
+
+      - uses: actions/checkout@v6.0.2
+        with:
+          submodules: true
+
+      - name: Setup builder
+        run: |
+          useradd --create-home --home-dir /build --uid 1000 user
+          printf "user ALL=(ALL:ALL) NOPASSWD: ALL\n" >> /etc/sudoers
+          sudo -u user mkdir /build/repo
+
+          sudo -u user cat << EOF > /build/.makepkg.conf
+          PACKAGER="Pascal Diehm <pdiehm8@gmail.com>"
+          SRCDEST=/build/src
+          PKGDEST=/build/pkgs
+          BUILDDIR=/build/work
+          EOF
+
+      - uses: actions/cache@v5.0.5
+        with:
+          key: pkgs
+          path: /build/pkgs
+
+      - name: Clean cache
+        run: if [[ -d /build/pkgs ]]; then find /build/pkgs -mtime +7 -delete; fi
+
+      - name: Install paru
+        run: sudo -u user env -C paru makepkg --noconfirm --syncdeps --install
+
+      - name: Build packages
+        run: |
+          for pkg in */; do
+            if [[ $pkg != paru/ ]]; then
+              echo "::group::${pkg%/}"
+              sudo -u user env -C "$pkg" paru --noconfirm --build .
+              echo "::endgroup::"
+            fi
+
+            sudo -u user env -C "$pkg" makepkg --packagelist | while read -r pkg; do
+              if [[ ! -f $pkg ]]; then continue; fi
+              sudo -u user touch "$pkg"
+              sudo -u user cp "$pkg" /build/repo
+            done
+          done
+
+      - name: Build repository
+        run: repo-add /build/repo/aur.db.tar.gz /build/repo/*
+
+      - uses: actions/upload-pages-artifact@v5.0.0
+        with:
+          path: /build/repo
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+
+    permissions:
+      pages: write
+      id-token: write
+
+    steps:
+      - uses: actions/configure-pages@v6.0.0
+      - uses: actions/deploy-pages@v5.0.0

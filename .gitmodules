@@ -31,3 +31,6 @@
 [submodule "java-language-server"]
 	path = java-language-server
 	url = https://aur.archlinux.org/java-language-server.git
+[submodule "phpactor"]
+	path = phpactor
+	url = https://aur.archlinux.org/phpactor.git

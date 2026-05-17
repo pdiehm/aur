@@ -16,3 +16,6 @@
 [submodule "dockerfmt"]
 	path = dockerfmt
 	url = https://aur.archlinux.org/dockerfmt.git
+[submodule "google-java-format"]
+	path = google-java-format
+	url = https://aur.archlinux.org/google-java-format.git

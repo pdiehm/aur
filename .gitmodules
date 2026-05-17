@@ -10,3 +10,6 @@
 [submodule "prettier-plugin-xml"]
 	path = prettier-plugin-xml
 	url = https://aur.archlinux.org/prettier-plugin-xml.git
+[submodule "nixd"]
+	path = nixd
+	url = https://aur.archlinux.org/nixd.git

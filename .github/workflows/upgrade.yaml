@@ -11,7 +11,6 @@ jobs:
 
     permissions:
       contents: write
-      pull-requests: write
 
     steps:
       - name: Install packages
@@ -24,6 +23,7 @@ jobs:
       - name: Upgrade
         run: |
           for pkg in */; do
+            pkg="${pkg%/}"
             if [[ -e $pkg/.git || ! -f $pkg/.nvchecker.toml ]]; then continue; fi
 
             cd "$pkg"
@@ -33,7 +33,7 @@ jobs:
 
       - name: Publish
         env:
-          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ secrets.PR_TOKEN }}
         run: |
           chown root:root .
           git add */PKGBUILD
@@ -42,7 +42,7 @@ jobs:
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
 
-            BRANCH="upgrade-$(date "+%F" | tr -d -)"
+            BRANCH="upgrade/$(date "+%F")"
             git checkout -b "$BRANCH"
 
             git commit --message "chore: upgrade"

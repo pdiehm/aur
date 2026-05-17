@@ -25,3 +25,6 @@
 [submodule "prettier-plugin-php"]
 	path = prettier-plugin-php
 	url = https://aur.archlinux.org/prettier-plugin-php.git
+[submodule "nixfmt"]
+	path = nixfmt
+	url = https://aur.archlinux.org/nixfmt.git

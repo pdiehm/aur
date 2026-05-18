@@ -39,20 +39,32 @@ jobs:
           path: /build/pkgs
 
       - name: Install paru
-        run: sudo -u user env -C paru makepkg --noconfirm --syncdeps --install
+        run: |
+          PRE="$(date "+%s")"
+          sudo -u user env -C paru makepkg --noconfirm --syncdeps --install
+          POST="$(date "+%s")"
+          TIME=$((POST - PRE))
+
+          echo "## Build times" >> "$GITHUB_STEP_SUMMARY"
+          printf -- "- %s: %dm %02ds\n" "paru" "$((TIME / 60))" "$((TIME % 60))" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Build packages
         run: |
           for pkg in */; do
             pkg="${pkg%/}"
-
             if [[ $pkg != paru ]]; then
               echo "::group::$pkg"
-              if [[ -f $pkg.patch ]]; then env -C "$pkg" patch -p 1 < "$pkg.patch"; fi
+              PRE="$(date "+%s")"
 
+              if [[ -f $pkg.patch ]]; then env -C "$pkg" patch -p 1 < "$pkg.patch"; fi
               sudo -u user env -C "$pkg" paru --noconfirm --build .
+
+              POST="$(date "+%s")"
               echo "::endgroup::"
             fi
+
+            TIME=$((POST - PRE))
+            printf -- "- %s: %dm %02ds\n" "$pkg" "$((TIME / 60))" "$((TIME % 60))" >> "$GITHUB_STEP_SUMMARY"
 
             sudo -u user env -C "$pkg" makepkg --packagelist | while read -r pkg; do
               if [[ ! -f $pkg ]]; then continue; fi
@@ -66,6 +78,19 @@ jobs:
 
       - name: Clean cache
         run: if [[ -d /build/pkgs ]]; then find /build/pkgs -mtime +7 -delete; fi
+
+      - name: Print summary
+        run: |
+          echo "## Files" >> "$GITHUB_STEP_SUMMARY"
+          echo "### Repository" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          ls -Alh /build/repo | tail -n +2 >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+          echo "### Cache" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          ls -Alh /build/pkgs | tail -n +2 >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
 
       - uses: actions/upload-pages-artifact@v5.0.0
         with:

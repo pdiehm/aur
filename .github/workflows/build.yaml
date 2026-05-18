@@ -28,6 +28,8 @@ jobs:
 
           sudo -u user cat << EOF > /build/.makepkg.conf
           PACKAGER="Pascal Diehm <pdiehm8@gmail.com>"
+          OPTIONS=(strip docs !libtool !staticlibs emptydirs zipman purge !debug lto)
+
           SRCDEST=/build/src
           PKGDEST=/build/pkgs
           BUILDDIR=/build/work

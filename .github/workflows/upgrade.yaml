@@ -14,11 +14,14 @@ jobs:
 
     steps:
       - name: Install packages
-        run: pacman --noconfirm --sync --refresh --sysupgrade git devtools github-cli
+        run: pacman --noconfirm --sync --refresh --sysupgrade git devtools nvchecker github-cli
 
       - uses: actions/checkout@v6.0.2
         with:
           submodules: true
+
+      - name: Fix repo permissions
+        run: chown root:root .
 
       - name: Upgrade
         run: |
@@ -28,6 +31,7 @@ jobs:
 
             cd "$pkg"
             pkgctl version upgrade
+            git add PKGBUILD
             cd ..
           done
 
@@ -35,9 +39,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.PR_TOKEN }}
         run: |
-          chown root:root .
-          git add */PKGBUILD
-
           if ! git diff --staged --quiet; then
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"

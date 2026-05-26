@@ -80,7 +80,7 @@ jobs:
         run: repo-add /build/repo/aur.db.tar.gz /build/repo/*
 
       - name: Clean cache
-        run: if [[ -d /build/pkgs ]]; then find /build/pkgs -mtime +7 -delete; fi
+        run: find /build/pkgs -mtime +7 -delete
 
       - name: Print summary
         run: |

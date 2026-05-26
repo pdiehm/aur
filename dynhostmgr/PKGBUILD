@@ -1,0 +1,29 @@
+# Maintainer: Pascal Diehm <pdiehm8@gmail.com>
+# shellcheck disable=SC2034,SC2154,SC2164
+
+pkgname="dynhostmgr"
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="Dynamically update /etc/hosts with reachable addresses"
+arch=("x86_64")
+makedepends=("rust")
+source=("dynhostmgr.tgz" "dynhostmgr.service")
+sha256sums=("SKIP" "SKIP")
+
+prepare() {
+  cd dynhostmgr
+  cargo fetch --locked
+}
+
+build() {
+  cd dynhostmgr
+  cargo build --frozen --release
+}
+
+package() {
+  cargo install --frozen --no-track --path dynhostmgr --root "$pkgdir/usr"
+  install -Dm644 dynhostmgr.service "$pkgdir/usr/lib/systemd/system/dynhostmgr.service"
+
+  install -d "$pkgdir/etc"
+  touch "$pkgdir/etc/dynhosts"
+}

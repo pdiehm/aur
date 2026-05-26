@@ -1,0 +1,13 @@
+[Unit]
+Description=Dynamically update /etc/hosts with reachable addresses
+After=network.target systemd-networkd-wait-online.service NetworkManager-wait-online.service
+Before=network-online.target
+
+[Service]
+ExecStart=/usr/bin/dynhostmgr
+ExecStartPost=/bin/sh -c "until grep '### DYNAMIC HOSTS START ###' /etc/hosts; do sleep 1; done"
+
+[Install]
+WantedBy=network.target
+
+; vim: ft=systemd

@@ -3,10 +3,10 @@
 
 pkgname="dynhostmgr"
 pkgver=0.1.0
-pkgrel=2
+pkgrel=3
 pkgdesc="Dynamically update /etc/hosts with reachable addresses"
 arch=("x86_64")
-makedepends=("rust")
+makedepends=("cargo")
 source=("dynhostmgr.tgz" "dynhostmgr.service")
 sha256sums=("SKIP" "SKIP")
 
@@ -21,6 +21,6 @@ build() {
 }
 
 package() {
-  install -Dm755 dynhostmgr/target/release/dynhostmgr "$pkgdir/usr/lib/dynhostmgr"
+  install -Dm755 dynhostmgr/target/release/dynhostmgr "$pkgdir/usr/lib/dynhostmgr/dynhostmgr"
   install -Dm644 dynhostmgr.service "$pkgdir/usr/lib/systemd/system/dynhostmgr.service"
 }

@@ -4,7 +4,7 @@ After=network.target systemd-networkd-wait-online.service NetworkManager-wait-on
 Before=network-online.target
 
 [Service]
-ExecStart=/usr/lib/dynhostmgr
+ExecStart=/usr/lib/dynhostmgr/dynhostmgr
 ExecStartPost=/bin/sh -c "until grep -q '### DYNAMIC HOSTS START ###' /etc/hosts; do sleep 1; done"
 
 [Install]

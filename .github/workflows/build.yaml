@@ -14,20 +14,32 @@ jobs:
 
     steps:
       - name: Install packages
-        run: pacman --noconfirm --sync --refresh --sysupgrade base-devel git
+        run: |
+          pacman-key --init
+          pacman --noconfirm --sync --refresh --sysupgrade base-devel git
 
       - uses: actions/checkout@v6.0.2
         with:
           submodules: true
 
       - name: Setup builder
+        env:
+          GPG_KEY: ${{ secrets.GPG_KEY }}
         run: |
           useradd --create-home --home-dir /build --uid 1000 user
-          printf "user ALL=(ALL:ALL) NOPASSWD: ALL\n" >> /etc/sudoers
+          echo "user ALL=(ALL:ALL) NOPASSWD: ALL" >> /etc/sudoers
           sudo -u user mkdir /build/repo
+
+          sudo -u user gpg --import <<< "$GPG_KEY"
+          sudo -u user gpg --export "FE3A61A8A1C70F006D5718250AAB0BC4ED614894" | pacman-key --add -
+          pacman-key --lsign-key "FE3A61A8A1C70F006D5718250AAB0BC4ED614894"
 
           sudo -u user cat << EOF > /build/.makepkg.conf
           PACKAGER="Pascal Diehm <pdiehm8@gmail.com>"
+          GPGKEY="FE3A61A8A1C70F006D5718250AAB0BC4ED614894"
+
+          PKGEXT=".pkg.tar.zst"
+          BUILDENV=(!distcc !color !ccache check sign)
           OPTIONS=(strip docs !libtool !staticlibs emptydirs zipman purge !debug lto)
 
           SRCDEST=/build/src
@@ -71,16 +83,16 @@ jobs:
 
             sudo -u user env -C "$pkg" makepkg --packagelist | while read -r pkg; do
               if [[ ! -f $pkg ]]; then continue; fi
-              sudo -u user touch "$pkg"
-              sudo -u user cp "$pkg" /build/repo
+              sudo -u user touch "$pkg" "$pkg.sig"
+              sudo -u user cp "$pkg" "$pkg.sig" /build/repo
             done
           done
 
       - name: Build repository
-        run: repo-add /build/repo/aur.db.tar.gz /build/repo/*
+        run: sudo -u user repo-add --include-sigs --sign --key FE3A61A8A1C70F006D5718250AAB0BC4ED614894 /build/repo/aur.db.tar.gz /build/repo/*.pkg.tar.zst
 
       - name: Clean cache
-        run: find /build/pkgs -mtime +7 -delete
+        run: find /build/pkgs -mtime +0 -delete
 
       - name: Print summary
         run: |

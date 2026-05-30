@@ -3,7 +3,7 @@
 
 pkgname="prettier-plugin-organize-imports"
 pkgver=4.3.0
-pkgrel=1
+pkgrel=2
 pkgdesc="Make Prettier organize your imports using the TypeScript language service API"
 arch=("any")
 url="https://github.com/simonhaenisch/prettier-plugin-organize-imports"
@@ -17,7 +17,7 @@ sha256sums=('8b1f8543518fada3614d19022b61ec9d935e30191d6a1f336460e07566bfdb4b')
 package() {
   npm install --global --prefix "$pkgdir/usr" --no-bin-links "$srcdir/$pkgname-$pkgver.tgz"
   install -d "$pkgdir/usr/share/licenses/$pkgname"
-  ln -s "../../../lib/node_modules/$pkgname/LICENSE" "$pkgdir/usr/share/licenses/$pkgname"
+  ln -s "../../../lib/node_modules/$pkgname/license" "$pkgdir/usr/share/licenses/$pkgname"
 
   main="$pkgdir/usr/lib/node_modules/$pkgname/package.json"
   tmp="$(mktemp)"

@@ -1,0 +1,38 @@
+# Maintainer: Pascal Diehm <pdiehm8@gmail.com>
+# shellcheck disable=SC2034,SC2154
+
+pkgname="prettier-plugin-organize-imports"
+pkgver=4.3.0
+pkgrel=1
+pkgdesc="Make Prettier organize your imports using the TypeScript language service API"
+arch=("any")
+url="https://github.com/simonhaenisch/prettier-plugin-organize-imports"
+license=("MIT")
+depends=("prettier" "nodejs")
+makedepends=("git" "npm" "jq")
+source=("https://registry.npmjs.org/$pkgname/-/$pkgname-$pkgver.tgz")
+noextract=("$pkgname-$pkgver.tgz")
+sha256sums=('8b1f8543518fada3614d19022b61ec9d935e30191d6a1f336460e07566bfdb4b')
+
+package() {
+  npm install --global --prefix "$pkgdir/usr" --no-bin-links "$srcdir/$pkgname-$pkgver.tgz"
+  install -d "$pkgdir/usr/share/licenses/$pkgname"
+  ln -s "../../../lib/node_modules/$pkgname/LICENSE" "$pkgdir/usr/share/licenses/$pkgname"
+
+  main="$pkgdir/usr/lib/node_modules/$pkgname/package.json"
+  tmp="$(mktemp)"
+
+  find "$pkgdir/usr" -type f -name package.json -print0 | while read -rd "" json; do
+    if [[ $json == "$main" ]]; then
+      jq 'with_entries(select(.key | test("^_.+") | not))' "$json" > "$tmp"
+    else
+      jq "del(._where, .man)" "$json" > "$tmp"
+    fi
+
+    cp "$tmp" "$json"
+  done
+
+  rm "$tmp"
+  find "$pkgdir/usr" -type d -exec chmod 755 "{}" +
+  chown -R root:root "$pkgdir"
+}

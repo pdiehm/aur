@@ -1,0 +1,5 @@
+[prettier-plugin-organize-imports]
+source = "github"
+github = "simonhaenisch/prettier-plugin-organize-imports"
+use_max_tag = true
+prefix = "v"

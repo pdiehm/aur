@@ -56,33 +56,28 @@ jobs:
           restore-keys: pkgs-
           path: /build/pkgs
 
-      - name: Install paru
-        run: |
-          PRE="$(date "+%s")"
-          sudo -u user env -C paru makepkg --noconfirm --syncdeps --install
-          POST="$(date "+%s")"
-          TIME=$((POST - PRE))
-
-          echo "## Build times" >> "$GITHUB_STEP_SUMMARY"
-          printf -- "- %s: %dm %02ds\n" "paru" "$((TIME / 60))" "$((TIME % 60))" >> "$GITHUB_STEP_SUMMARY"
-
       - name: Build packages
         run: |
-          for pkg in */; do
+          echo "## Build times" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Package | Build time |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| --- | --- |" >> "$GITHUB_STEP_SUMMARY"
+
+          for pkg in paru */; do
+            if [[ $pkg == paru/ ]]; then continue; fi
             pkg="${pkg%/}"
-            if [[ $pkg != paru ]]; then
-              echo "::group::$pkg"
-              PRE="$(date "+%s")"
 
-              if [[ -f $pkg.patch ]]; then env -C "$pkg" patch -p 1 < "$pkg.patch"; fi
-              sudo -u user env -C "$pkg" paru --noconfirm --build .
+            echo "::group::$pkg"
+            PRE="$(date "+%s")"
 
-              POST="$(date "+%s")"
-              echo "::endgroup::"
-            fi
+            if [[ -f $pkg.patch ]]; then env -C "$pkg" patch -p 1 < "$pkg.patch"; fi
+            if [[ $pkg == paru ]]; then CMD=(makepkg --noconfirm --syncdeps --install); else CMD=(paru --noconfirm --build .); fi
+            sudo -u user env -C "$pkg" "${CMD[@]}"
+
+            POST="$(date "+%s")"
+            echo "::endgroup::"
 
             TIME=$((POST - PRE))
-            printf -- "- %s: %dm %02ds\n" "$pkg" "$((TIME / 60))" "$((TIME % 60))" >> "$GITHUB_STEP_SUMMARY"
+            printf "| %s | %dm %02ds |\n" "$pkg" "$((TIME / 60))" "$((TIME % 60))" >> "$GITHUB_STEP_SUMMARY"
 
             sudo -u user env -C "$pkg" makepkg --packagelist | while read -r pkg; do
               if [[ ! -f $pkg ]]; then continue; fi
@@ -99,6 +94,13 @@ jobs:
 
       - name: Print summary
         run: |
+          echo "## Packages" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Package | Size |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| --- | --- |" >> "$GITHUB_STEP_SUMMARY"
+          ls -lh /build/repo/*.pkg.tar.zst | tail -n +2 | while read -r _ _ _ _ size _ _ _ file _; do
+            printf "| %s | %s |\n" "${file##*/}" "$size" >> "$GITHUB_STEP_SUMMARY"
+          done
+
           echo "## Files" >> "$GITHUB_STEP_SUMMARY"
           echo "### Repository" >> "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"

@@ -17,21 +17,21 @@ jobs:
         run: pacman --noconfirm --sync --refresh --sysupgrade git devtools nvchecker github-cli
 
       - uses: actions/checkout@v6.0.2
-        with:
-          submodules: true
 
-      - name: Fix repo permissions
-        run: chown root:root .
+      - name: Setup user
+        run: |
+          useradd --create-home user
+          chown -R user:user .
 
       - name: Upgrade
         run: |
           for pkg in */; do
             pkg="${pkg%/}"
-            if [[ -e $pkg/.git || ! -f $pkg/.nvchecker.toml ]]; then continue; fi
+            if [[ ! -f $pkg/.nvchecker.toml ]]; then continue; fi
 
             cd "$pkg"
-            pkgctl version upgrade
-            git add PKGBUILD
+            sudo -u user pkgctl version upgrade || true
+            sudo -u user git add PKGBUILD
             cd ..
           done
 
@@ -39,6 +39,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.PR_TOKEN }}
         run: |
+          chown -R root:root .
           if ! git diff --staged --quiet; then
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"

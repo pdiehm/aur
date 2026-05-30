@@ -1,9 +1,12 @@
+name: Upgrade
+
 on:
   schedule:
     - cron: "0 0 * * 6"
 
 jobs:
   upgrade:
+    name: Upgrade
     runs-on: ubuntu-latest
 
     container:

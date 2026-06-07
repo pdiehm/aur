@@ -19,7 +19,7 @@ jobs:
       - name: Install packages
         run: pacman --noconfirm --sync --refresh --sysupgrade git devtools nvchecker github-cli
 
-      - uses: actions/checkout@v6.0.2
+      - uses: actions/checkout@v6.0.3
 
       - name: Setup user
         run: |

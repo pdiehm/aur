@@ -27,9 +27,11 @@ jobs:
           echo "user ALL=(ALL:ALL) NOPASSWD: ALL" >> /etc/sudoers
           sudo -u user mkdir /build/repo
 
-          sudo -u user gpg --import <<< "$GPG_KEY"
-          sudo -u user gpg --export "FE3A61A8A1C70F006D5718250AAB0BC4ED614894" | pacman-key --add -
-          pacman-key --lsign-key "FE3A61A8A1C70F006D5718250AAB0BC4ED614894"
+          if [[ -n $GPG_KEY ]]; then
+            sudo -u user gpg --import <<< "$GPG_KEY"
+            sudo -u user gpg --export "FE3A61A8A1C70F006D5718250AAB0BC4ED614894" | pacman-key --add -
+            pacman-key --lsign-key "FE3A61A8A1C70F006D5718250AAB0BC4ED614894"
+          fi
 
           sudo -u user cat << EOF > /build/.makepkg.conf
           PACKAGER="Pascal Diehm <pdiehm8@gmail.com>"
@@ -44,7 +46,12 @@ jobs:
           BUILDDIR=/build/work
           EOF
 
+          if [[ -z $GPG_KEY ]]; then
+            sudo -u user sed -i 's/sign/!sign/' /build/.makepkg.conf
+          fi
+
       - uses: actions/cache@v5.0.5
+        if: github.ref_name == 'main'
         with:
           key: pkgs-${{ github.run_id }}
           restore-keys: pkgs-
@@ -81,12 +88,15 @@ jobs:
           done
 
       - name: Build repository
+        if: github.ref_name == 'main'
         run: sudo -u user repo-add --include-sigs --sign --key FE3A61A8A1C70F006D5718250AAB0BC4ED614894 /build/repo/aur.db.tar.gz /build/repo/*.pkg.tar.zst
 
       - name: Clean cache
+        if: github.ref_name == 'main'
         run: find /build/pkgs -mtime +0 -delete
 
       - name: Print summary
+        if: github.ref_name == 'main'
         run: |
           echo "## Packages" >> "$GITHUB_STEP_SUMMARY"
           echo "| Package | Size |" >> "$GITHUB_STEP_SUMMARY"
@@ -107,6 +117,7 @@ jobs:
           echo '```' >> "$GITHUB_STEP_SUMMARY"
 
       - uses: actions/upload-pages-artifact@v5.0.0
+        if: github.ref_name == 'main'
         with:
           path: /build/repo
 

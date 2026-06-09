@@ -1,0 +1,71 @@
+# Maintainer: Pascal Diehm <pdiehm8@gmail.com>
+# shellcheck disable=SC2034,SC2154
+
+pkgname="nvim-plugins-pd"
+pkgver=r19023
+pkgrel=1
+pkgdesc="Neovim plugin collection"
+arch=("x86_64")
+depends=("tree-sitter-cli" "tar" "curl" "gcc")
+makedepends=("git" "neovim")
+
+source=(
+  "git+https://github.com/nvim-treesitter/nvim-treesitter"
+  "git+https://github.com/stevearc/conform.nvim"
+  "git+https://github.com/neovim/nvim-lspconfig"
+  "git+https://github.com/hrsh7th/nvim-cmp"
+  "git+https://github.com/hrsh7th/cmp-nvim-lsp"
+  "git+https://github.com/hrsh7th/cmp-buffer"
+  "git+https://github.com/hrsh7th/cmp-path"
+  "git+https://github.com/kylechui/nvim-surround"
+  "git+https://github.com/windwp/nvim-ts-autotag"
+  "git+https://github.com/navarasu/onedark.nvim"
+  "git+https://github.com/nvim-lualine/lualine.nvim"
+  "git+https://github.com/lewis6991/gitsigns.nvim"
+  "git+https://github.com/onsails/lspkind.nvim"
+  "git+https://github.com/stevearc/oil.nvim"
+  "git+https://github.com/nvim-telescope/telescope.nvim"
+  "git+https://github.com/nvim-telescope/telescope-ui-select.nvim"
+  "git+https://github.com/folke/todo-comments.nvim"
+  "git+https://github.com/akinsho/toggleterm.nvim"
+  "git+https://github.com/hat0uma/csvview.nvim"
+  "git+https://github.com/nvim-tree/nvim-web-devicons" # lualine, oil
+  "git+https://github.com/nvim-lua/plenary.nvim"       # telescope
+)
+
+sha256sums=("${source[@]/*/SKIP}")
+
+pkgver() {
+  local repo count rev=0
+
+  for repo in "$srcdir"/*/; do
+    count="$(git -C "$repo" rev-list --count HEAD)"
+    rev=$((rev + count))
+  done
+
+  printf "r%d" "$rev"
+}
+
+build() {
+  local tmp query
+  tmp="$(mktemp -d)"
+  mv "$srcdir"/*/ "$tmp"
+
+  mkdir -p "$srcdir/runtime/pack/pd/start" "$srcdir/site"
+  mv "$tmp"/* "$srcdir/runtime/pack/pd/start"
+  rmdir "$tmp"
+
+  VIMRUNTIME="$srcdir/runtime" nvim -es -u NONE -i NONE \
+    -c "lua require('nvim-treesitter').setup({ install_dir = '$srcdir/site' })" \
+    -c "lua require('nvim-treesitter').install({ 'stable', 'unstable' }):wait(600000)"
+
+  for query in "$srcdir/site/queries"/*; do
+    rm "$query"
+    ln -s "../../runtime/pack/pd/start/nvim-treesitter/runtime/queries/${query##*/}" "$query"
+  done
+}
+
+package() {
+  install -d "$pkgdir/usr/share/nvim"
+  mv "$srcdir"/* "$pkgdir/usr/share/nvim"
+}

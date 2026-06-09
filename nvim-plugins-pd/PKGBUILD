@@ -2,33 +2,30 @@
 # shellcheck disable=SC2034,SC2154
 
 pkgname="nvim-plugins-pd"
-pkgver=r19023
-pkgrel=2
+pkgver=r19903
+pkgrel=1
 pkgdesc="Neovim plugin collection"
 arch=("x86_64")
 depends=("tree-sitter-cli" "tar" "curl" "gcc")
-makedepends=("git" "neovim")
+makedepends=("git" "neovim" "cargo")
 
 source=(
   "git+https://github.com/nvim-treesitter/nvim-treesitter"
-  "git+https://github.com/stevearc/conform.nvim"
   "git+https://github.com/neovim/nvim-lspconfig"
-  "git+https://github.com/hrsh7th/nvim-cmp"
-  "git+https://github.com/hrsh7th/cmp-nvim-lsp"
-  "git+https://github.com/hrsh7th/cmp-buffer"
-  "git+https://github.com/hrsh7th/cmp-path"
+  "git+https://github.com/stevearc/conform.nvim"
+  "git+https://github.com/saghen/blink.cmp"
   "git+https://github.com/kylechui/nvim-surround"
   "git+https://github.com/windwp/nvim-ts-autotag"
   "git+https://github.com/navarasu/onedark.nvim"
   "git+https://github.com/nvim-lualine/lualine.nvim"
   "git+https://github.com/lewis6991/gitsigns.nvim"
-  "git+https://github.com/onsails/lspkind.nvim"
   "git+https://github.com/stevearc/oil.nvim"
   "git+https://github.com/nvim-telescope/telescope.nvim"
   "git+https://github.com/nvim-telescope/telescope-ui-select.nvim"
   "git+https://github.com/folke/todo-comments.nvim"
   "git+https://github.com/akinsho/toggleterm.nvim"
   "git+https://github.com/hat0uma/csvview.nvim"
+  "git+https://github.com/saghen/blink.lib"            # blink.cmp
   "git+https://github.com/nvim-tree/nvim-web-devicons" # lualine, oil
   "git+https://github.com/nvim-lua/plenary.nvim"       # telescope
 )
@@ -47,22 +44,27 @@ pkgver() {
 }
 
 build() {
-  local tmp query
-  tmp="$(mktemp -d)"
-  mv "$srcdir"/*/ "$tmp"
+  local path
+  path="$(mktemp -d)"
+  mv "$srcdir"/*/ "$path"
 
   mkdir -p "$srcdir/runtime/pack/pd/start" "$srcdir/site"
-  mv "$tmp"/* "$srcdir/runtime/pack/pd/start"
-  rmdir "$tmp"
+  mv "$path"/* "$srcdir/runtime/pack/pd/start"
+  rmdir "$path"
+
+  for path in "$srcdir/runtime/pack/pd/start"/*/doc; do
+    VIMRUNTIME="$srcdir/runtime" nvim -es -u NONE -i NONE -c "helptags $path"
+  done
 
   VIMRUNTIME="$srcdir/runtime" nvim -es -u NONE -i NONE \
     -c "lua require('nvim-treesitter').setup({ install_dir = '$srcdir/site' })" \
-    -c "lua require('nvim-treesitter').install({ 'stable', 'unstable' }):wait(600000)"
+    -c "lua require('nvim-treesitter').install({ 'stable', 'unstable' }):wait(600000)" \
+    -c "lua require('blink.cmp').build():pwait()"
 
   sed -i "s|^\s*install_dir = .*$|  install_dir = '/usr/share/nvim/site',|" "$srcdir/runtime/pack/pd/start/nvim-treesitter/lua/nvim-treesitter/config.lua"
-  for query in "$srcdir/site/queries"/*; do
-    rm "$query"
-    ln -s "../../runtime/pack/pd/start/nvim-treesitter/runtime/queries/${query##*/}" "$query"
+  for path in "$srcdir/site/queries"/*; do
+    rm "$path"
+    ln -s "../../runtime/pack/pd/start/nvim-treesitter/runtime/queries/${path##*/}" "$path"
   done
 }
 

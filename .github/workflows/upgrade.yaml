@@ -17,23 +17,29 @@ jobs:
 
     steps:
       - name: Install packages
-        run: pacman --noconfirm --sync --refresh --sysupgrade git devtools nvchecker github-cli
+        run: pacman --noconfirm --sync --refresh --sysupgrade base-devel devtools nvchecker git github-cli
 
       - uses: actions/checkout@v6.0.3
 
       - name: Setup user
         run: |
           useradd --create-home user
+          echo "user ALL=(ALL:ALL) NOPASSWD: ALL" >> /etc/sudoers
           chown -R user:user .
 
       - name: Upgrade
         run: |
           for pkg in */; do
             pkg="${pkg%/}"
-            if [[ ! -f $pkg/.nvchecker.toml ]]; then continue; fi
+            if [[ ! -f $pkg/PKGBUILD ]]; then continue; fi
 
             cd "$pkg"
-            sudo -u user pkgctl version upgrade || true
+            if [[ -f .nvchecker.toml ]]; then
+              sudo -u user pkgctl version upgrade || true
+            else
+              sudo -u user makepkg --noconfirm --syncdeps --nobuild
+            fi
+
             sudo -u user git add PKGBUILD
             cd ..
           done

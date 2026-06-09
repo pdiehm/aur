@@ -3,7 +3,7 @@
 
 pkgname="nvim-plugins-pd"
 pkgver=r19023
-pkgrel=1
+pkgrel=2
 pkgdesc="Neovim plugin collection"
 arch=("x86_64")
 depends=("tree-sitter-cli" "tar" "curl" "gcc")
@@ -59,6 +59,7 @@ build() {
     -c "lua require('nvim-treesitter').setup({ install_dir = '$srcdir/site' })" \
     -c "lua require('nvim-treesitter').install({ 'stable', 'unstable' }):wait(600000)"
 
+  sed -i "s|^\s*install_dir = .*$|  install_dir = '/usr/share/nvim/site',|" "$srcdir/runtime/pack/pd/start/nvim-treesitter/lua/nvim-treesitter/config.lua"
   for query in "$srcdir/site/queries"/*; do
     rm "$query"
     ln -s "../../runtime/pack/pd/start/nvim-treesitter/runtime/queries/${query##*/}" "$query"

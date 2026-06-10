@@ -59,7 +59,7 @@ build() {
   VIMRUNTIME="$srcdir/runtime" nvim -es -u NONE -i NONE \
     -c "lua require('nvim-treesitter').setup({ install_dir = '$srcdir/site' })" \
     -c "lua require('nvim-treesitter').install({ 'stable', 'unstable' }):wait(600000)" \
-    -c "lua require('blink.cmp').build():pwait()"
+    -c "lua require('blink.cmp').build():wait(600000)"
 
   sed -i "s|^\s*install_dir = .*$|  install_dir = '/usr/share/nvim/site',|" "$srcdir/runtime/pack/pd/start/nvim-treesitter/lua/nvim-treesitter/config.lua"
   make -C "$srcdir/runtime/pack/pd/start/telescope-fzf-native.nvim"

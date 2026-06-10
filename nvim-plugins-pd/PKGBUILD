@@ -2,12 +2,11 @@
 # shellcheck disable=SC2034,SC2154
 
 pkgname="nvim-plugins-pd"
-pkgver=r19903
+pkgver=r19977
 pkgrel=1
 pkgdesc="Neovim plugin collection"
 arch=("x86_64")
-depends=("tree-sitter-cli" "tar" "curl" "gcc")
-makedepends=("git" "neovim" "cargo")
+makedepends=("git" "neovim" "tree-sitter-cli" "tar" "curl" "make" "gcc" "cargo")
 
 source=(
   "git+https://github.com/nvim-treesitter/nvim-treesitter"
@@ -21,13 +20,14 @@ source=(
   "git+https://github.com/lewis6991/gitsigns.nvim"
   "git+https://github.com/stevearc/oil.nvim"
   "git+https://github.com/nvim-telescope/telescope.nvim"
+  "git+https://github.com/nvim-telescope/telescope-fzf-native.nvim"
   "git+https://github.com/nvim-telescope/telescope-ui-select.nvim"
   "git+https://github.com/folke/todo-comments.nvim"
   "git+https://github.com/akinsho/toggleterm.nvim"
   "git+https://github.com/hat0uma/csvview.nvim"
   "git+https://github.com/saghen/blink.lib"            # blink.cmp
   "git+https://github.com/nvim-tree/nvim-web-devicons" # lualine, oil
-  "git+https://github.com/nvim-lua/plenary.nvim"       # telescope
+  "git+https://github.com/nvim-lua/plenary.nvim"       # telescope, todo-comments
 )
 
 sha256sums=("${source[@]/*/SKIP}")
@@ -62,6 +62,8 @@ build() {
     -c "lua require('blink.cmp').build():pwait()"
 
   sed -i "s|^\s*install_dir = .*$|  install_dir = '/usr/share/nvim/site',|" "$srcdir/runtime/pack/pd/start/nvim-treesitter/lua/nvim-treesitter/config.lua"
+  make -C "$srcdir/runtime/pack/pd/start/telescope-fzf-native.nvim"
+
   for path in "$srcdir/site/queries"/*; do
     rm "$path"
     ln -s "../../runtime/pack/pd/start/nvim-treesitter/runtime/queries/${path##*/}" "$path"

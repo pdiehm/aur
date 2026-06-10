@@ -32,16 +32,10 @@ jobs:
           for pkg in */; do
             pkg="${pkg%/}"
             if [[ ! -f $pkg/PKGBUILD ]]; then continue; fi
+            if [[ -f $pkg/.nvchecker.toml ]]; then CMD=(pkgctl version upgrade); else CMD=(makepkg --noconfirm --syncdeps --nobuild); fi
 
-            cd "$pkg"
-            if [[ -f .nvchecker.toml ]]; then
-              sudo -u user pkgctl version upgrade || true
-            else
-              sudo -u user makepkg --noconfirm --syncdeps --nobuild
-            fi
-
-            sudo -u user git add PKGBUILD
-            cd ..
+            sudo -u user env -C "$pkg" "${CMD[@]}"
+            sudo -u user git add "$pkg/PKGBUILD"
           done
 
       - name: Publish

@@ -3,7 +3,7 @@
 
 pkgname="nvim-plugins-pd"
 pkgver=r19977
-pkgrel=1
+pkgrel=2
 pkgdesc="Neovim plugin collection"
 arch=("x86_64")
 makedepends=("git" "neovim" "tree-sitter-cli" "tar" "curl" "make" "gcc" "cargo")
@@ -35,7 +35,7 @@ sha256sums=("${source[@]/*/SKIP}")
 pkgver() {
   local repo count rev=0
 
-  for repo in "$srcdir"/*/; do
+  for repo in "$srcdir"/*; do
     count="$(git -C "$repo" rev-list --count HEAD)"
     rev=$((rev + count))
   done
@@ -46,7 +46,7 @@ pkgver() {
 build() {
   local path
   path="$(mktemp -d)"
-  mv "$srcdir"/*/ "$path"
+  mv "$srcdir"/* "$path"
 
   mkdir -p "$srcdir/runtime/pack/pd/start" "$srcdir/site"
   mv "$path"/* "$srcdir/runtime/pack/pd/start"
@@ -63,6 +63,7 @@ build() {
 
   sed -i "s|^\s*install_dir = .*$|  install_dir = '/usr/share/nvim/site',|" "$srcdir/runtime/pack/pd/start/nvim-treesitter/lua/nvim-treesitter/config.lua"
   make -C "$srcdir/runtime/pack/pd/start/telescope-fzf-native.nvim"
+  rm -rf "$srcdir/runtime/pack/pd/start/blink.cmp/target"
 
   for path in "$srcdir/site/queries"/*; do
     rm "$path"

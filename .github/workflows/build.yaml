@@ -81,7 +81,7 @@ jobs:
             printf "| %s | %dm %02ds |\n" "$pkg" "$((TIME / 60))" "$((TIME % 60))" >> "$GITHUB_STEP_SUMMARY"
 
             sudo -u user env -C "$pkg" makepkg --packagelist | while read -r pkg; do
-              if [[ ! -f $pkg ]]; then continue; fi
+              if [[ ! -f $pkg || ! -f $pkg.sig ]]; then continue; fi
               sudo -u user touch "$pkg" "$pkg.sig"
               sudo -u user cp "$pkg" "$pkg.sig" /build/repo
             done

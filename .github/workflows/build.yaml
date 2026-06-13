@@ -93,7 +93,7 @@ jobs:
 
       - name: Clean cache
         if: github.ref_name == 'main'
-        run: find /build/pkgs -mtime +0 -delete
+        run: find /build/pkgs -mindepth 1 -mtime +0 -delete
 
       - name: Print summary
         if: github.ref_name == 'main'

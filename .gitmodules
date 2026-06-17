@@ -34,3 +34,6 @@
 [submodule "phpactor"]
 	path = phpactor
 	url = https://aur.archlinux.org/phpactor.git
+[submodule "quickemu"]
+	path = quickemu
+	url = https://aur.archlinux.org/quickemu.git

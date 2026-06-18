@@ -40,3 +40,6 @@
 [submodule "zfs-utils"]
 	path = zfs-utils
 	url = https://aur.archlinux.org/zfs-utils.git
+[submodule "zfs-linux-lts"]
+	path = zfs-linux-lts
+	url = https://aur.archlinux.org/zfs-linux-lts.git

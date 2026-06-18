@@ -37,3 +37,6 @@
 [submodule "quickemu"]
 	path = quickemu
 	url = https://aur.archlinux.org/quickemu.git
+[submodule "zfs-utils"]
+	path = zfs-utils
+	url = https://aur.archlinux.org/zfs-utils.git

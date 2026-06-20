@@ -33,7 +33,7 @@ jobs:
             pacman-key --lsign-key "FE3A61A8A1C70F006D5718250AAB0BC4ED614894"
           fi
 
-          sudo -u user cat << EOF > /build/.makepkg.conf
+          cat << EOF > /build/.makepkg.conf
           PACKAGER="Pascal Diehm <pdiehm8@gmail.com>"
           GPGKEY="FE3A61A8A1C70F006D5718250AAB0BC4ED614894"
 

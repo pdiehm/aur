@@ -1,10 +1,19 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 7a56aa0..f33644c 100644
+index be00d01..3b86cba 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
+@@ -2,7 +2,7 @@
+ 
+ pkgname=nixfmt
+ pkgver=1.3.1 # renovate: datasource=github-tags depName=NixOS/nixfmt
+-pkgrel=1
++pkgrel=2
+ pkgdesc="Official formatter for Nix code"
+ url="https://github.com/NixOS/nixfmt"
+ license=("MPL-2.0")
 @@ -12,7 +12,11 @@ makedepends=('ghc' 'uusi')
  source=("https://github.com/NixOS/$pkgname/archive/v$pkgver.tar.gz")
- b2sums=('5655a4dd1ff4d261f459f369c710b6dbe70a742cea2f7cc0a1cfea22d7529a246cbe946a8f2f843b9f5058ebd17e3607f0f887068153d1766e4b9911f7a16f36')
+ b2sums=('18c47aaa56b33c3e87b4b1eb13ebbc7cd00df378e95c3fd868b6a45f06abb8d061047005bd9785f7f0d20c395956b167a592b34e3cb378c3432572c10a8aa845')
  
 +source+=("pd.patch")
 +b2sums+=("f8c032dc94c89834246111f1ddd6931f850068bbc66fa391297d6c4d470f9dccf999abcc692b929e2757835125b5c4fc15ea30d2a0ca0ddfb149ed3ac03b04b5")

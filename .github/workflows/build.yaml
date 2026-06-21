@@ -21,7 +21,7 @@ jobs:
           pacman-key --init
           pacman --noconfirm --sync --refresh --sysupgrade base-devel git
 
-      - uses: actions/checkout@v6.0.3
+      - uses: actions/checkout@v7.0.0
         with:
           submodules: true
 

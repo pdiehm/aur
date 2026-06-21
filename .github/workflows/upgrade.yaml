@@ -21,7 +21,7 @@ jobs:
           pacman --noconfirm --sync --refresh --sysupgrade base-devel devtools nvchecker git github-cli
           sed -i "s/return 1/return 0/" /usr/share/devtools/lib/util/term.sh
 
-      - uses: actions/checkout@v6.0.3
+      - uses: actions/checkout@v7.0.0
 
       - name: Setup user
         run: |

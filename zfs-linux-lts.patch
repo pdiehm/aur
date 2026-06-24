@@ -1,0 +1,15 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 211bc5a..7db9592 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -16,6 +16,10 @@ _kernelver="6.18.36-1"
+ _kernelver_full="6.18.36-1"
+ _extramodules="6.18.36-1-lts"
+ 
++_kernelver="$(pacman -Si linux-lts | sed -En 's/^Version\s*: (.+)$/\1/p')"
++_kernelver_full="$_kernelver"
++_extramodules="$_kernelver-lts"
++
+ pkgver="${_zfsver}_$(echo ${_kernelver} | sed s/-/./g)"
+ pkgrel=1
+ makedepends=("linux-lts-headers=${_kernelver}")

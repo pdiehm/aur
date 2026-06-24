@@ -32,6 +32,7 @@ jobs:
           useradd --create-home --home-dir /build --uid 1000 user
           echo "user ALL=(ALL:ALL) NOPASSWD: ALL" >> /etc/sudoers
           sudo -u user mkdir /build/repo
+          chown -R user:user .
 
           if [[ -n $GPG_KEY ]]; then
             sudo -u user gpg --import <<< "$GPG_KEY"
@@ -53,7 +54,7 @@ jobs:
           EOF
 
           if [[ -z $GPG_KEY ]]; then
-            sudo -u user sed -i 's/sign/!sign/' /build/.makepkg.conf
+            sed -i 's/sign/!sign/' /build/.makepkg.conf
           fi
 
       - uses: actions/cache@v5.0.5

@@ -59,7 +59,7 @@ jobs:
             sed -i 's/sign/!sign/' /build/.makepkg.conf
           fi
 
-      - uses: actions/cache@v5.0.5
+      - uses: actions/cache@v6.1.0
         if: github.ref_name == 'main'
         with:
           key: pkgs-${{ github.run_id }}

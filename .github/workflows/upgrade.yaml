@@ -33,10 +33,9 @@ jobs:
         run: |
           for pkg in */; do
             pkg="${pkg%/}"
-            if [[ ! -f $pkg/PKGBUILD ]]; then continue; fi
-            if [[ -f $pkg/.nvchecker.toml ]]; then CMD=(pkgctl version upgrade); else CMD=(makepkg --noconfirm --syncdeps --nobuild); fi
+            if [[ ! -f $pkg/.nvchecker.toml ]]; then continue; fi
 
-            sudo -u user env -C "$pkg" "${CMD[@]}"
+            sudo -u user env -C "$pkg" pkgctl version upgrade
             sudo -u user git add "$pkg/PKGBUILD"
           done
 
@@ -44,8 +43,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.PR_TOKEN }}
         run: |
-          chown -R root:root .
-          if ! git diff --staged --quiet; then
+          if ! sudo -u user git diff --staged --quiet; then
+            chown -R root:root .
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
 

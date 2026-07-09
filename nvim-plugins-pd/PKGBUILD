@@ -2,8 +2,8 @@
 # shellcheck disable=SC2034,SC2154
 
 pkgname="nvim-plugins-pd"
-pkgver=r20015
-pkgrel=1
+pkgver="1.0.0"
+pkgrel="$(date -I | tr -d -)"
 pkgdesc="Neovim plugin collection"
 arch=("x86_64")
 makedepends=("git" "neovim" "tree-sitter-cli" "tar" "curl" "make" "gcc" "cargo")
@@ -31,17 +31,6 @@ source=(
 )
 
 sha256sums=("${source[@]/*/SKIP}")
-
-pkgver() {
-  local repo count rev=0
-
-  for repo in "$srcdir"/*; do
-    count="$(git -C "$repo" rev-list --count HEAD)"
-    rev=$((rev + count))
-  done
-
-  printf "r%d" "$rev"
-}
 
 build() {
   local path

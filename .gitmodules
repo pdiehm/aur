@@ -37,3 +37,6 @@
 [submodule "zfs-linux-lts"]
 	path = zfs-linux-lts
 	url = https://aur.archlinux.org/zfs-linux-lts.git
+[submodule "tlrc"]
+	path = tlrc
+	url = https://aur.archlinux.org/tlrc.git

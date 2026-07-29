@@ -1,0 +1,12 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 8e7a0b2..100c54d 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -32,4 +32,7 @@ package() {
+   cp -r "${srcdir}/output/"* "${pkgdir}"
+   install -d "${pkgdir}"/usr/bin
+   ln -s /opt/VIA/via-nativia "${pkgdir}"/usr/bin/via
++
++  install -d "$pkgdir/etc/udev/rules.d"
++  printf 'KERNEL=="hidraw*", SUBSYSTEM=="hidraw", MODE="0666", TAG+="uaccess", TAG+="udev-acl"' > "$pkgdir/etc/udev/rules.d/92-viia.rules"
+ }

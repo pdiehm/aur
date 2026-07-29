@@ -40,3 +40,6 @@
 [submodule "tlrc"]
 	path = tlrc
 	url = https://aur.archlinux.org/tlrc.git
+[submodule "via-bin"]
+	path = via-bin
+	url = https://aur.archlinux.org/via-bin.git

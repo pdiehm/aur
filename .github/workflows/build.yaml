@@ -116,14 +116,8 @@ jobs:
           done
 
           echo "## Files" >> "$GITHUB_STEP_SUMMARY"
-          echo "### Repository" >> "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
           ls -Alh /build/repo | tail -n +2 >> "$GITHUB_STEP_SUMMARY"
-          echo '```' >> "$GITHUB_STEP_SUMMARY"
-
-          echo "### Cache" >> "$GITHUB_STEP_SUMMARY"
-          echo '```' >> "$GITHUB_STEP_SUMMARY"
-          ls -Alh /build/pkgs | tail -n +2 >> "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
 
       - uses: actions/upload-pages-artifact@v5.0.0

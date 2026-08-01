@@ -1,12 +1,24 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 8e7a0b2..100c54d 100644
+index 8e7a0b2..34a9aaf 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -32,4 +32,7 @@ package() {
+@@ -3,7 +3,7 @@
+ _pkgname=via
+ pkgname=$_pkgname-bin
+ pkgver=3.0.0
+-pkgrel=0
++pkgrel=1
+ pkgdesc="an electron wrapper that points to https://usevia.app/"
+ arch=(any)
+ url="https://caniuse$_pkgname.com/"
+@@ -31,5 +31,9 @@ build() {
+ package() {
    cp -r "${srcdir}/output/"* "${pkgdir}"
    install -d "${pkgdir}"/usr/bin
-   ln -s /opt/VIA/via-nativia "${pkgdir}"/usr/bin/via
+-  ln -s /opt/VIA/via-nativia "${pkgdir}"/usr/bin/via
++  # ln -s /opt/VIA/via-nativia "${pkgdir}"/usr/bin/via
 +
-+  install -d "$pkgdir/etc/udev/rules.d"
-+  printf 'KERNEL=="hidraw*", SUBSYSTEM=="hidraw", MODE="0666", TAG+="uaccess", TAG+="udev-acl"' > "$pkgdir/etc/udev/rules.d/92-viia.rules"
++  echo 'DISABLE_SUDO_PROMPT=1 exec /opt/VIA/via-nativia "$@"' > "$pkgdir/usr/bin/via"
++  chmod +x "$pkgdir/usr/bin/via"
++  sed -i "s|/opt/VIA/via-nativia|/usr/bin/via|" "$pkgdir/usr/share/applications/via-nativia.desktop"
  }

@@ -75,29 +75,28 @@ jobs:
           echo "| Package | Build time |" >> "$GITHUB_STEP_SUMMARY"
           echo "| --- | --- |" >> "$GITHUB_STEP_SUMMARY"
 
-          for pkg in paru */; do
-            if [[ $pkg == paru/ ]]; then continue; fi
-            pkg="${pkg%/}"
+          while read -ru 3 -a pkg; do
+            for pkg in "${pkg[@]}"; do
+              echo "::group::$pkg"
+              PRE="$(date "+%s")"
 
-            echo "::group::$pkg"
-            PRE="$(date "+%s")"
+              if [[ -f $pkg.patch ]]; then env -C "$pkg" patch -p 1 < "$pkg.patch"; fi
+              if [[ $pkg == paru ]]; then CMD=(makepkg --noconfirm --syncdeps --install); else CMD=(paru --noconfirm --install --build .); fi
+              sudo -u user env -C "$pkg" "${CMD[@]}"
 
-            if [[ -f $pkg.patch ]]; then env -C "$pkg" patch -p 1 < "$pkg.patch"; fi
-            if [[ $pkg == paru ]]; then CMD=(makepkg --noconfirm --syncdeps --install); else CMD=(paru --noconfirm --build .); fi
-            sudo -u user env -C "$pkg" "${CMD[@]}"
+              POST="$(date "+%s")"
+              echo "::endgroup::"
 
-            POST="$(date "+%s")"
-            echo "::endgroup::"
+              TIME="$((POST - PRE))"
+              printf "| %s | %dm %02ds |\n" "$pkg" "$((TIME / 60))" "$((TIME % 60))" >> "$GITHUB_STEP_SUMMARY"
 
-            TIME=$((POST - PRE))
-            printf "| %s | %dm %02ds |\n" "$pkg" "$((TIME / 60))" "$((TIME % 60))" >> "$GITHUB_STEP_SUMMARY"
-
-            sudo -u user env -C "$pkg" makepkg --packagelist | while read -r pkg; do
-              if [[ ! -f $pkg || ! -f $pkg.sig ]]; then continue; fi
-              sudo -u user touch "$pkg" "$pkg.sig"
-              sudo -u user cp "$pkg" "$pkg.sig" /build/repo
+              sudo -u user env -C "$pkg" makepkg --packagelist | while read -r pkg; do
+                if [[ ! -f $pkg || ! -f $pkg.sig ]]; then continue; fi
+                sudo -u user touch "$pkg" "$pkg.sig"
+                sudo -u user cp "$pkg" "$pkg.sig" /build/repo
+              done
             done
-          done
+          done 3< PKGS.txt
 
       - name: Build repository
         if: github.ref_name == 'main'

@@ -1,0 +1,17 @@
+paru
+bibtex-tidy
+cmake-format cmake-language-server
+dockerfmt
+dynhostmgr
+nixd
+nixfmt
+nvim-plugins-pd
+phpactor
+prettier-plugin-css-order
+prettier-plugin-organize-imports
+prettier-plugin-php
+prettier-plugin-xml
+quickemu
+tlrc
+via-bin
+zfs-utils zfs-linux-lts

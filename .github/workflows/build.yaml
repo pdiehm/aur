@@ -39,7 +39,7 @@ jobs:
           sudo -u user mkdir /build/repo
           chown -R user:user .
 
-          if [[ -n $GPG_KEY ]]; then
+          if [[ $GPG_KEY ]]; then
             sudo -u user gpg --import <<< "$GPG_KEY"
             sudo -u user gpg --export "FE3A61A8A1C70F006D5718250AAB0BC4ED614894" | pacman-key --add -
             pacman-key --lsign-key "FE3A61A8A1C70F006D5718250AAB0BC4ED614894"
@@ -58,7 +58,7 @@ jobs:
           BUILDDIR=/build/work
           EOF
 
-          if [[ -z $GPG_KEY ]]; then
+          if [[ ! $GPG_KEY ]]; then
             sed -i 's/sign/!sign/' /build/.makepkg.conf
           fi
 
@@ -116,11 +116,6 @@ jobs:
           ls -lh /build/repo/*.pkg.tar.zst | tail -n +2 | while read -r _ _ _ _ size _ _ _ file _; do
             printf "| %s | %s |\n" "${file##*/}" "$size" >> "$GITHUB_STEP_SUMMARY"
           done
-
-          echo "## Files" >> "$GITHUB_STEP_SUMMARY"
-          echo '```' >> "$GITHUB_STEP_SUMMARY"
-          ls -Alh /build/repo | tail -n +2 >> "$GITHUB_STEP_SUMMARY"
-          echo '```' >> "$GITHUB_STEP_SUMMARY"
 
       - uses: actions/upload-pages-artifact@v5.0.0
         if: github.ref_name == 'main'

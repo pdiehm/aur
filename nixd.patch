@@ -1,0 +1,13 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 9923d73..898b4f9 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -1,7 +1,7 @@
+ # Maintainer: kharec <sandro@cazzaniga.fr>
+ pkgname=nixd
+ pkgver=2.9.2
+-pkgrel=1
++pkgrel="$(date -I | tr -d -)"
+ pkgdesc='Nix language server'
+ arch=('x86_64')
+ url='https://github.com/nix-community/nixd'

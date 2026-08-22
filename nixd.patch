@@ -1,13 +1,29 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 9923d73..898b4f9 100644
+index 9923d73..d401aa7 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -1,7 +1,7 @@
- # Maintainer: kharec <sandro@cazzaniga.fr>
- pkgname=nixd
- pkgver=2.9.2
--pkgrel=1
-+pkgrel="$(date -I | tr -d -)"
- pkgdesc='Nix language server'
- arch=('x86_64')
- url='https://github.com/nix-community/nixd'
+@@ -13,18 +13,21 @@ source=("$pkgname-$pkgver.tar.gz::https://github.com/nix-community/nixd/archive/
+ sha256sums=('2b46cc1e91fcf76e7b939905fa696217ea96639af9e9444cfe8afa18088cccbd'
+             'a2fc1f82264e43873a34e4742b456383f4a32fb474c5618da598f80e6895f8f1')
+ 
++_pkgver="$pkgver"
++pkgver+="+nix$(pacman -Si nix | sed -En "s/^Version\s*: (.+)$/\1/p" | tr - .)"
++
+ prepare() {
+-  cd "$pkgname-$pkgver"
++  cd "$pkgname-$_pkgver"
+   patch -Np1 -i "$srcdir/nixd-llvm19-compat.patch"
+ }
+ 
+ build() {
+-  cd "$pkgname-$pkgver"
++  cd "$pkgname-$_pkgver"
+   meson setup build --prefix=/usr --buildtype=release
+   meson compile -C build
+ }
+ 
+ package() {
+-  cd "$pkgname-$pkgver"
++  cd "$pkgname-$_pkgver"
+   meson install -C build --destdir="$pkgdir"
+ }

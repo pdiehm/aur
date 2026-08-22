@@ -1,20 +1,43 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index be00d01..199fd1a 100644
+index 7489cda..29f9175 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -12,7 +12,12 @@ makedepends=('ghc' 'uusi')
+@@ -12,12 +12,18 @@ makedepends=('ghc' 'uusi')
  source=("https://github.com/NixOS/$pkgname/archive/v$pkgver.tar.gz")
- b2sums=('18c47aaa56b33c3e87b4b1eb13ebbc7cd00df378e95c3fd868b6a45f06abb8d061047005bd9785f7f0d20c395956b167a592b34e3cb378c3432572c10a8aa845')
+ b2sums=('1f099c1adbd3514c6b4e079741035e152e3d9dbbe7ab1c2b724420408704bf90ac7b70869768c1f7158e5cc8efd9976095b3ce0573cdf509c8c624be1074e354')
  
-+pkgrel="$(date -I | tr -d -)"
++_pkgver="$pkgver"
++pkgver+="+nix$(pacman -Si nix | sed -En "s/^Version\s*: (.+)$/\1/p" | tr - .)"
 +source+=("pd.patch")
 +b2sums+=("f8c032dc94c89834246111f1ddd6931f850068bbc66fa391297d6c4d470f9dccf999abcc692b929e2757835125b5c4fc15ea30d2a0ca0ddfb149ed3ac03b04b5")
 +
  prepare() {
-+  env -C "$pkgname-$pkgver" patch -p 1 < pd.patch
-   uusi $pkgname-$pkgver/$pkgname.cabal
+-  uusi $pkgname-$pkgver/$pkgname.cabal
++  env -C "$pkgname-$_pkgver" patch -p 1 < pd.patch
++  uusi $pkgname-$_pkgver/$pkgname.cabal
  }
  
+ build() {
+-  cd $pkgname-$pkgver
++  cd $pkgname-$_pkgver
+ 
+   gen-setup
+   runhaskell Setup configure -O --enable-shared --enable-executable-dynamic --disable-library-vanilla \
+@@ -34,12 +40,12 @@ build() {
+ }
+ 
+ check() {
+-  cd $pkgname-$pkgver
++  cd $pkgname-$_pkgver
+   runhaskell Setup test
+ }
+ 
+ package() {
+-  cd $pkgname-$pkgver
++  cd $pkgname-$_pkgver
+ 
+   install -D -m744 register.sh "$pkgdir"/usr/share/haskell/register/$pkgname.sh
+   install -D -m744 unregister.sh "$pkgdir"/usr/share/haskell/unregister/$pkgname.sh
 diff --git a/pd.patch b/pd.patch
 new file mode 100644
 index 0000000..be5e0e6

@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 9923d73..d401aa7 100644
+index 9923d73..6b0b88e 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -13,18 +13,21 @@ source=("$pkgname-$pkgver.tar.gz::https://github.com/nix-community/nixd/archive/
@@ -7,7 +7,7 @@ index 9923d73..d401aa7 100644
              'a2fc1f82264e43873a34e4742b456383f4a32fb474c5618da598f80e6895f8f1')
  
 +_pkgver="$pkgver"
-+pkgver+="+nix$(pacman -Si nix | sed -En "s/^Version\s*: (.+)$/\1/p" | tr - .)"
++pkgver+="_$(pacman -Si nix | sed -En "s/^Version\s*: (.+)$/\1/p" | tr - .)"
 +
  prepare() {
 -  cd "$pkgname-$pkgver"

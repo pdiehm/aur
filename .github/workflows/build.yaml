@@ -22,9 +22,7 @@ jobs:
 
     steps:
       - name: Install Packages
-        run: |
-          pacman-key --init
-          pacman --noconfirm --sync --refresh --sysupgrade base-devel git
+        run: pacman --noconfirm --sync --refresh --sysupgrade base-devel git
 
       - uses: actions/checkout@v7.0.1
         with:
@@ -40,6 +38,7 @@ jobs:
           chown -R user:user .
 
           if [[ $GPG_KEY ]]; then
+            pacman-key --init
             sudo -u user gpg --import <<< "$GPG_KEY"
             sudo -u user gpg --export "FE3A61A8A1C70F006D5718250AAB0BC4ED614894" | pacman-key --add -
             pacman-key --lsign-key "FE3A61A8A1C70F006D5718250AAB0BC4ED614894"
@@ -105,6 +104,7 @@ jobs:
         run: sudo -u user repo-add --include-sigs --sign --key FE3A61A8A1C70F006D5718250AAB0BC4ED614894 /build/repo/aur.db.tar.gz /build/repo/*.pkg.tar.zst
 
       - name: Print Summary
+        if: github.ref_name == 'main'
         run: |
           echo "## Packages" >> "$GITHUB_STEP_SUMMARY"
           echo "| Package | Size |" >> "$GITHUB_STEP_SUMMARY"

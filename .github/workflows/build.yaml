@@ -21,7 +21,7 @@ jobs:
       image: archlinux
 
     steps:
-      - name: Install packages
+      - name: Install Packages
         run: |
           pacman-key --init
           pacman --noconfirm --sync --refresh --sysupgrade base-devel git
@@ -30,7 +30,7 @@ jobs:
         with:
           submodules: true
 
-      - name: Setup user
+      - name: Setup Environment
         env:
           GPG_KEY: ${{ secrets.GPG_KEY }}
         run: |
@@ -68,7 +68,7 @@ jobs:
           restore-keys: pkgs-
           path: /build/pkgs
 
-      - name: Build packages
+      - name: Build Packages
         run: |
           echo "## Build times" >> "$GITHUB_STEP_SUMMARY"
           echo "| Package | Build time |" >> "$GITHUB_STEP_SUMMARY"
@@ -97,14 +97,14 @@ jobs:
             done
           done 3< PKGS.txt
 
-      - name: Build repository
+      - name: Build Repository
         if: github.ref_name == 'main'
         run: sudo -u user repo-add --include-sigs --sign --key FE3A61A8A1C70F006D5718250AAB0BC4ED614894 /build/repo/aur.db.tar.gz /build/repo/*.pkg.tar.zst
 
-      - name: Clean cache
+      - name: Clean Cache
         run: find /build/pkgs -mindepth 1 -mtime +0 -delete
 
-      - name: Print summary
+      - name: Print Summary
         run: |
           echo "## Packages" >> "$GITHUB_STEP_SUMMARY"
           echo "| Package | Size |" >> "$GITHUB_STEP_SUMMARY"

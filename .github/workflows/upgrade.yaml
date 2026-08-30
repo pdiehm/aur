@@ -31,10 +31,8 @@ jobs:
 
       - name: Upgrade
         run: |
-          for pkg in */; do
-            pkg="${pkg%/}"
-            if [[ ! -f $pkg/.nvchecker.toml ]]; then continue; fi
-
+          for pkg in */.nvchecker.toml; do
+            pkg="${pkg%/*}"
             sudo -u user env -C "$pkg" pkgctl version upgrade
             sudo -u user git add "$pkg/PKGBUILD"
           done

@@ -116,7 +116,9 @@ jobs:
 
       - name: Clean Cache
         if: github.ref_name == 'main'
-        run: find /build/pkgs -mindepth 1 -mtime +0 -delete
+        run: |
+          find /build/pkgs -mindepth 1 -mtime +0 -delete
+          pacman --noconfirm --sync --clean
 
       - uses: actions/cache/save@v6.1.0
         if: github.ref_name == 'main'

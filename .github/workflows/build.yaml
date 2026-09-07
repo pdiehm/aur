@@ -118,6 +118,7 @@ jobs:
         if: github.ref_name == 'main'
         run: |
           find /build/pkgs -mindepth 1 -mtime +0 -delete
+          rmdir /var/cache/pacman/pkg/download-* # HACK: https://gitlab.archlinux.org/pacman/pacman/-/work_items/297
           pacman --noconfirm --sync --clean
 
       - uses: actions/cache/save@v6.1.0

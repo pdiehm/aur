@@ -64,7 +64,7 @@ jobs:
 
       - uses: actions/cache/restore@v6.1.0
         with:
-          key: pkgs-${{ github.run_id }}
+          key: pkgs
           restore-keys: pkgs-
           path: |
             /build/pkgs
@@ -124,7 +124,7 @@ jobs:
       - uses: actions/cache/save@v6.1.0
         if: github.ref_name == 'main'
         with:
-          key: pkgs-${{ github.run_id }}
+          key: pkgs
           path: |
             /build/pkgs
             /var/cache/pacman/pkg

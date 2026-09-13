@@ -1,20 +1,24 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 7489cda..15466bf 100644
+index 107d18f..87ca217 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -12,12 +12,18 @@ makedepends=('ghc' 'uusi')
+@@ -12,8 +12,14 @@ makedepends=('ghc' 'uusi')
  source=("https://github.com/NixOS/$pkgname/archive/v$pkgver.tar.gz")
- b2sums=('1f099c1adbd3514c6b4e079741035e152e3d9dbbe7ab1c2b724420408704bf90ac7b70869768c1f7158e5cc8efd9976095b3ce0573cdf509c8c624be1074e354')
+ b2sums=('524b10c7ba2ec9d6701370100d123e917d68f27a05e8d802030cfb5d5a205ba9aa3a070aaed863a76d4af0342a4d1d74c0aa4bbdf4f6e09bd3ea4128bd08ecbc')
  
 +_pkgver="$pkgver"
 +pkgver="$(date -I | tr - .)"
 +source+=("pd.patch")
-+b2sums+=("f8c032dc94c89834246111f1ddd6931f850068bbc66fa391297d6c4d470f9dccf999abcc692b929e2757835125b5c4fc15ea30d2a0ca0ddfb149ed3ac03b04b5")
++b2sums+=("c01ee48a2040dd531af0f00696fe73177004b7cc74bcf15c207e6988e0e328d3b1241204880922e2fb6fb9927bedbe639c14085ee33b3bf191af2c6fbf1bbca1")
 +
  prepare() {
--  uusi $pkgname-$pkgver/$pkgname.cabal
-+  env -C "$pkgname-$_pkgver" patch -p 1 < pd.patch
-+  uusi $pkgname-$_pkgver/$pkgname.cabal
+-  cd $pkgname-$pkgver
++  cd $pkgname-$_pkgver
++  patch -p 1 < ../pd.patch
+ 
+   # GHC 9.6 supports GHC2024's extensions, but not the edition alias.
+   sed -Ei 's/(default-language:[[:space:]]*)GHC2024/\1GHC2021/' $pkgname.cabal
+@@ -23,7 +29,7 @@ prepare() {
  }
  
  build() {
@@ -23,7 +27,7 @@ index 7489cda..15466bf 100644
  
    gen-setup
    runhaskell Setup configure -O --enable-shared --enable-executable-dynamic --disable-library-vanilla \
-@@ -34,12 +40,12 @@ build() {
+@@ -40,12 +46,12 @@ build() {
  }
  
  check() {
@@ -40,15 +44,15 @@ index 7489cda..15466bf 100644
    install -D -m744 unregister.sh "$pkgdir"/usr/share/haskell/unregister/$pkgname.sh
 diff --git a/pd.patch b/pd.patch
 new file mode 100644
-index 0000000..be5e0e6
+index 0000000..6837dc8
 --- /dev/null
 +++ b/pd.patch
-@@ -0,0 +1,215 @@
+@@ -0,0 +1,219 @@
 +diff --git a/src/Nixfmt/Pretty.hs b/src/Nixfmt/Pretty.hs
-+index a9e64d0..c58a0b7 100644
++index f8ebd96..aba9b7c 100644
 +--- a/src/Nixfmt/Pretty.hs
 ++++ b/src/Nixfmt/Pretty.hs
-+@@ -155,15 +155,8 @@ hasOnlyComments (Items xs) = not (null xs) && all isComment xs
++@@ -166,15 +166,8 @@ hasOnlyComments (Items xs) = not (null xs) && all isComment xs
 + renderList :: Doc -> Ann Token -> Items Term -> Ann Token -> Doc
 + renderList itemSep paropen@Ann{trailComment = post} items parclose =
 +   pretty (paropen{trailComment = Nothing})
@@ -65,7 +69,7 @@ index 0000000..be5e0e6
 + 
 + instance Pretty Trivia where
 +   pretty [] = mempty
-+@@ -190,25 +183,19 @@ instance Pretty Binder where
++@@ -201,25 +194,19 @@ instance Pretty Binder where
 +   pretty (Inherit inherit Nothing ids semicolon) =
 +     group $
 +       pretty inherit
@@ -96,7 +100,7 @@ index 0000000..be5e0e6
 +   -- `foo = bar`
 +   pretty (Assignment selectors assign expr semicolon) =
 +     group $
-+@@ -231,25 +218,15 @@ instance Pretty Binder where
++@@ -242,25 +229,15 @@ instance Pretty Binder where
 + prettySet :: Bool -> (Maybe Leaf, Leaf, Items Binder, Leaf) -> Doc
 + -- Empty attribute set
 + prettySet _ (krec, paropen@(LoneAnn _), Items [], parclose@Ann{preTrivia = []}) =
@@ -125,7 +129,7 @@ index 0000000..be5e0e6
 + 
 + prettyTermWide :: Term -> Doc
 + prettyTermWide (Set krec paropen items parclose) = prettySet True (krec, paropen, items, parclose)
-+@@ -281,14 +258,11 @@ prettyTerm (Selection term selectors rest) =
++@@ -292,14 +269,11 @@ prettyTerm (Selection term selectors rest) =
 + 
 + -- Empty list
 + prettyTerm (List paropen@Ann{trailComment = Nothing} (Items []) parclose@Ann{preTrivia = []}) =
@@ -142,25 +146,28 @@ index 0000000..be5e0e6
 + prettyTerm (Set krec paropen items parclose) = prettySet False (krec, paropen, items, parclose)
 + -- Parentheses
 + prettyTerm (Parenthesized paropen expr parclose@Ann{preTrivia = closePre}) =
-+@@ -386,15 +360,12 @@ instance Pretty Parameter where
-+   pretty (IDParameter i) = pretty i
-+   -- {}:
-+   pretty (SetParameter bopen [] bclose) =
-+-    group $ pretty (moveTrailingCommentUp bopen) <> sep <> pretty bclose
++@@ -406,18 +380,15 @@ instance Pretty Parameter where
++   -- Empty attrs: `{}`
++   pretty (SetParameter paramLeft bopen [] bclose paramRight) =
++     pretty paramLeft
++-      <> group (pretty (moveTrailingCommentUp bopen) <> sep <> pretty bclose)
+++      <> group (pretty (moveTrailingCommentUp bopen) <> hardspace <> pretty bclose)
++       <> pretty paramRight
 +-    where
 +-      -- If the braces are on different lines, keep them like that
 +-      sep = if sourceLine bopen /= sourceLine bclose then hardline else hardspace
-++    group $ pretty (moveTrailingCommentUp bopen) <> hardspace <> pretty bclose
-+   -- { stuff }:
-+   pretty (SetParameter bopen attrs bclose) =
-+     group $
-+       pretty (moveTrailingCommentUp bopen)
-+-        <> surroundWith sep (nest $ sepBy sep $ handleTrailingComma $ map moveParamAttrComment $ moveParamsComments attrs)
-++        <> surroundWith line (nest $ sepBy line $ handleTrailingComma $ map moveParamAttrComment $ moveParamsComments attrs)
-+         <> nest (pretty (preTrivia bclose))
-+         <> pretty (bclose{preTrivia = []})
-+     where
-+@@ -407,10 +378,6 @@ instance Pretty Parameter where
++ 
++   -- Non-empty attrs: `{ stuff }`, `{ stuff }@param`, `param@{ stuff }`
++   pretty (SetParameter paramLeft bopen attrs bclose paramRight) =
++     pretty paramLeft
++       <> group
++         ( pretty (moveTrailingCommentUp bopen)
++-            <> surroundWith sep (nest $ sepBy sep $ handleTrailingComma $ map moveParamAttrComment $ moveParamsComments attrs)
+++            <> surroundWith line (nest $ sepBy line $ handleTrailingComma $ map moveParamAttrComment $ moveParamsComments attrs)
++             <> nest (pretty (preTrivia bclose))
++             <> pretty (bclose{preTrivia = []})
++         )
++@@ -432,11 +403,6 @@ instance Pretty Parameter where
 +         [pretty (ParamAttr name maybeDefault Nothing) <> trailing ","]
 +       handleTrailingComma (x : xs) = pretty x : handleTrailingComma xs
 + 
@@ -168,10 +175,11 @@ index 0000000..be5e0e6
 +-        if canFlattenAttrs bopen attrs bclose
 +-          then line
 +-          else hardline
-+   pretty (ContextParameter param1 at param2) =
-+     pretty param1 <> pretty at <> pretty param2
-+ 
-+@@ -555,10 +522,6 @@ prettyOp forceFirstTermWide operation op =
++-
++ -- Function application
++ -- Some example mapping of Nix code to Doc (using brackets as groups, but omitting the outermost group
++ -- and groups around the expressions for conciseness):
++@@ -583,10 +549,6 @@ prettyOp forceFirstTermWide operation op =
 +       flatten opL (Operation a opR b) | opR == op = flatten opL a ++ flatten (Just opR) b
 +       flatten opL x = [(opL, x)]
 + 
@@ -182,7 +190,7 @@ index 0000000..be5e0e6
 +       -- Called on every operand except the first one (a.k.a. RHS)
 +       absorbOperation :: Expression -> Doc
 +       absorbOperation (Term t) | isAbsorbable t = hardspace <> pretty t
-+@@ -574,13 +537,9 @@ prettyOp forceFirstTermWide operation op =
++@@ -602,13 +564,9 @@ prettyOp forceFirstTermWide operation op =
 +       prettyOperation (Nothing, expr) = pretty expr
 +       -- The others
 +       prettyOperation (Just op', expr) =
@@ -197,7 +205,7 @@ index 0000000..be5e0e6
 + 
 + prettyWith :: Bool -> Expression -> Doc
 + -- absorb the body
-+@@ -722,7 +681,7 @@ absorbRHS expr = case expr of
++@@ -748,7 +706,7 @@ absorbRHS expr = case expr of
 +   (Term (Path _)) -> nest $ hardspace <> group expr
 +   -- Non-absorbable term
 +   -- If it is multi-line, force it to start on a new line with indentation
@@ -206,7 +214,7 @@ index 0000000..be5e0e6
 +   -- Function call
 +   -- Absorb if all arguments except the last fit into the line, start on new line otherwise
 +   (Application f a) -> nest $ prettyApp False line False f a
-+@@ -745,7 +704,7 @@ absorbRHS expr = case expr of
++@@ -771,7 +729,7 @@ absorbRHS expr = case expr of
 +   -- If it fits on one line, it fits
 +   -- If it fits on one line but with a newline after the `=`, it fits (including semicolon)
 +   -- Otherwise, start on new line, expand fully (including the semicolon)
@@ -215,7 +223,7 @@ index 0000000..be5e0e6
 +   where
 +     isUpdateConcatPlus TUpdate = True
 +     isUpdateConcatPlus TConcat = True
-+@@ -777,7 +736,7 @@ instance Pretty Expression where
++@@ -803,7 +761,7 @@ instance Pretty Expression where
 +       inPart =
 +         group $
 +           pretty in_
@@ -224,7 +232,7 @@ index 0000000..be5e0e6
 +             <> pretty expr'
 +   pretty (Assert assert cond semicolon expr) =
 +     group $
-+@@ -813,16 +772,15 @@ instance Pretty Expression where
++@@ -839,16 +797,15 @@ instance Pretty Expression where
 + 
 +   -- Simple parameter
 +   pretty (Abstraction (IDParameter param) colon body) =
@@ -245,9 +253,9 @@ index 0000000..be5e0e6
 +-        (if depth <= 2 then line else hardline) <> pretty x
 ++      absorbAbs x = hardspace <> pretty x
 + 
-+   -- Set parameter: absorb if flattenable and on the same line, force multiline otherwise
-+   pretty (Abstraction param@(SetParameter bopen attrs bclose) colon body)
-+@@ -835,9 +793,9 @@ instance Pretty Expression where
++   -- Set parameter without context identifier: absorb if flattenable and on
++   -- the same line, force multiline otherwise
++@@ -862,9 +819,9 @@ instance Pretty Expression where
 +   -- Attrset parameter with absorbable body
 +   pretty (Abstraction param colon (Term t))
 +     | isAbsorbable t =

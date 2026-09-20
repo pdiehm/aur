@@ -2,6 +2,10 @@ name: Build
 
 on:
   workflow_dispatch:
+    inputs:
+      rebuild:
+        required: false
+        type: string
 
   push:
     branches: ["main"]
@@ -68,6 +72,15 @@ jobs:
           path: |
             /build/pkgs
             /var/cache/pacman/pkg
+
+      - name: Remove Stale Packages
+        if: ${{ inputs.rebuild }}
+        run: |
+          for pkg in ${{ inputs.rebuild }}; do
+            sudo -u user env -C "$pkg" makepkg --packagelist | while read -r pkg; do
+              rm -f "$pkg" "$pkg.sig"
+            done
+          done
 
       - name: Build Packages
         run: |

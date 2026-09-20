@@ -35,26 +35,26 @@ sha256sums=("${source[@]/*/SKIP}")
 build() {
   local path
   path="$(mktemp -d)"
-  mv "$srcdir"/* "$path"
+  mv ./* "$path"
 
-  mkdir -p "$srcdir/runtime/pack/pd/start" "$srcdir/site"
-  mv "$path"/* "$srcdir/runtime/pack/pd/start"
+  mkdir -p runtime/pack/pd/start site
+  mv "$path"/* runtime/pack/pd/start
   rmdir "$path"
 
-  for path in "$srcdir/runtime/pack/pd/start"/*/doc; do
-    VIMRUNTIME="$srcdir/runtime" nvim -es -u NONE -i NONE -c "helptags $path"
+  for path in runtime/pack/pd/start/*/doc; do
+    VIMRUNTIME="$PWD/runtime" nvim -es -u NONE -i NONE -c "helptags $path"
   done
 
-  VIMRUNTIME="$srcdir/runtime" nvim -es -u NONE -i NONE \
-    -c "lua require('nvim-treesitter').setup({ install_dir = '$srcdir/site' })" \
+  VIMRUNTIME="$PWD/runtime" nvim -es -u NONE -i NONE \
+    -c "lua require('nvim-treesitter').setup({ install_dir = '$PWD/site' })" \
     -c "lua require('nvim-treesitter').install({ 'stable', 'unstable' }):wait(600000)" \
     -c "lua require('blink.cmp').build():wait(600000)"
 
-  sed -i "s|^\s*install_dir = .*$|  install_dir = '/usr/share/nvim/site',|" "$srcdir/runtime/pack/pd/start/nvim-treesitter/lua/nvim-treesitter/config.lua"
-  make -C "$srcdir/runtime/pack/pd/start/telescope-fzf-native.nvim"
-  rm -rf "$srcdir/runtime/pack/pd/start/blink.cmp/target"
+  sed -Ei "s|^(\s*install_dir) = .*|\1 = '/usr/share/nvim/site',|" runtime/pack/pd/start/nvim-treesitter/lua/nvim-treesitter/config.lua
+  make -C runtime/pack/pd/start/telescope-fzf-native.nvim
+  rm -rf runtime/pack/pd/start/blink.cmp/target
 
-  for path in "$srcdir/site/queries"/*; do
+  for path in site/queries/*; do
     rm "$path"
     ln -s "../../runtime/pack/pd/start/nvim-treesitter/runtime/queries/${path##*/}" "$path"
   done
@@ -62,5 +62,5 @@ build() {
 
 package() {
   install -d "$pkgdir/usr/share/nvim"
-  mv "$srcdir"/* "$pkgdir/usr/share/nvim"
+  mv runtime site "$pkgdir/usr/share/nvim"
 }

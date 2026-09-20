@@ -52,9 +52,9 @@ jobs:
           BUILDENV=(!distcc !color !ccache check sign)
           OPTIONS=(strip docs !libtool !staticlibs emptydirs zipman purge !debug lto)
 
-          SRCDEST=/build/src
-          PKGDEST=/build/pkgs
-          BUILDDIR=/build/work
+          SRCDEST="/build/src"
+          PKGDEST="/build/pkgs"
+          BUILDDIR="/build/work"
           EOF
 
           if [[ ! $GPG_KEY ]]; then
@@ -75,13 +75,13 @@ jobs:
           echo "| Package | Build time |" >> "$GITHUB_STEP_SUMMARY"
           echo "| --- | --- |" >> "$GITHUB_STEP_SUMMARY"
 
-          while read -ru 3 -a pkg; do
-            for pkg in "${pkg[@]}"; do
+          while read -ru 3 -a pkgs; do
+            for pkg in "${pkgs[@]}"; do
               echo "::group::$pkg"
               PRE="$(date "+%s")"
 
               if [[ -f $pkg.patch ]]; then env -C "$pkg" patch -p 1 < "$pkg.patch"; fi
-              if [[ $pkg == paru ]]; then CMD=(makepkg --noconfirm --syncdeps --install); else CMD=(paru --noconfirm --install --build .); fi
+              if [[ $pkg == paru ]]; then CMD=(makepkg --noconfirm --syncdeps --install); else CMD=(paru --noconfirm --build --install .); fi
               sudo -u user env -C "$pkg" "${CMD[@]}"
 
               POST="$(date "+%s")"

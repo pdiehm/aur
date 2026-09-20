@@ -46,7 +46,7 @@ jobs:
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
 
-            BRANCH="upgrade/$(date "+%F")"
+            BRANCH="upgrade/$(date -I)"
             git checkout -b "$BRANCH"
 
             git commit --message "chore: upgrade"

@@ -1,16 +1,7 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 8e7a0b2..4864d5b 100644
+index 8e7a0b2..74fcd9a 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -3,7 +3,7 @@
- _pkgname=via
- pkgname=$_pkgname-bin
- pkgver=3.0.0
--pkgrel=0
-+pkgrel=1
- pkgdesc="an electron wrapper that points to https://usevia.app/"
- arch=(any)
- url="https://caniuse$_pkgname.com/"
 @@ -31,5 +31,8 @@ build() {
  package() {
    cp -r "${srcdir}/output/"* "${pkgdir}"

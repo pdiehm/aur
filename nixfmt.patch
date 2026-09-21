@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 107d18f..87ca217 100644
+index 107d18f..608b034 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -12,8 +12,14 @@ makedepends=('ghc' 'uusi')
@@ -9,7 +9,7 @@ index 107d18f..87ca217 100644
 +_pkgver="$pkgver"
 +pkgver="$(date -I | tr - .)"
 +source+=("pd.patch")
-+b2sums+=("c01ee48a2040dd531af0f00696fe73177004b7cc74bcf15c207e6988e0e328d3b1241204880922e2fb6fb9927bedbe639c14085ee33b3bf191af2c6fbf1bbca1")
++b2sums+=("SKIP")
 +
  prepare() {
 -  cd $pkgname-$pkgver

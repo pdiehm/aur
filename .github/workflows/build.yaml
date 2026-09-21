@@ -94,7 +94,7 @@ jobs:
               echo "::group::$pkg"
               PRE="$(date "+%s")"
 
-              if [[ -f $pkg.patch ]]; then env -C "$pkg" patch -p 1 < "$pkg.patch"; fi
+              if [[ -f $pkg.patch ]]; then patch -d "$pkg" -p 1 < "$pkg.patch"; fi
               if [[ $pkg == paru ]]; then CMD=(makepkg --noconfirm --syncdeps --install); else CMD=(paru --noconfirm --build --install .); fi
               sudo -u user env -C "$pkg" "${CMD[@]}"
 

@@ -7,8 +7,9 @@ trap 'git submodule deinit --force "$PKG"' EXIT
 git submodule update --init "$PKG"
 
 if [[ -f $PKG.patch ]]; then
-  patch -d "$PKG" -p 1 < "$PKG.patch"
-  git -C "$PKG" add .
+  if patch -d "$PKG" -p 1 < "$PKG.patch"; then
+    git -C "$PKG" add .
+  fi
 fi
 
 env -C "$PKG" "$EDITOR" .

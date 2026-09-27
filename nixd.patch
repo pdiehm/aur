@@ -1,10 +1,10 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 9923d73..6b0b88e 100644
+index e7b1c9e..016db94 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -13,18 +13,21 @@ source=("$pkgname-$pkgver.tar.gz::https://github.com/nix-community/nixd/archive/
- sha256sums=('2b46cc1e91fcf76e7b939905fa696217ea96639af9e9444cfe8afa18088cccbd'
-             'a2fc1f82264e43873a34e4742b456383f4a32fb474c5618da598f80e6895f8f1')
+@@ -15,19 +15,22 @@ sha256sums=('25cdadefa4dc1649121d6eb1c315c4f75ee79e0dd165bf25a38878a7f46b0426'
+             'a2fc1f82264e43873a34e4742b456383f4a32fb474c5618da598f80e6895f8f1'
+             'f551327c1e5e87b9d33642a0644073f1987fb37ebd25387689b28c537f28395d')
  
 +_pkgver="$pkgver"
 +pkgver+="_$(pacman -Si nix | sed -En "s/^Version\s*: (.+)$/\1/p" | tr - .)"
@@ -13,6 +13,7 @@ index 9923d73..6b0b88e 100644
 -  cd "$pkgname-$pkgver"
 +  cd "$pkgname-$_pkgver"
    patch -Np1 -i "$srcdir/nixd-llvm19-compat.patch"
+   patch -Np1 -i "$srcdir/nixd-llvm-shared.patch"
  }
  
  build() {

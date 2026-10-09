@@ -43,3 +43,6 @@
 [submodule "via-bin"]
 	path = via-bin
 	url = https://aur.archlinux.org/via-bin.git
+[submodule "google-java-format"]
+	path = google-java-format
+	url = https://aur.archlinux.org/google-java-format.git

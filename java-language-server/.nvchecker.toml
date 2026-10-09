@@ -1,0 +1,4 @@
+[java-language-server]
+source = "git"
+git = "https://github.com/georgewfraser/java-language-server.git"
+prefix = "v"

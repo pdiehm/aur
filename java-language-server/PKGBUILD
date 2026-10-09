@@ -1,0 +1,30 @@
+# Maintainer: Pascal Diehm <pdiehm8@gmail.com>
+# shellcheck disable=SC2034,SC2154,SC2164
+
+pkgname="java-language-server"
+pkgver=0.2.48
+pkgrel=1
+pkgdesc="Java language server using the Java compiler API"
+arch=("x86_64")
+url="https://github.com/georgewfraser/java-language-server"
+license=("MIT")
+makedepends=("maven")
+source=("$pkgname-$pkgver.tar.gz::$url/archive/v${pkgver}.tar.gz" "launcher.sh")
+sha256sums=('d40795ef3bcd91b5e5a27ae8a19c544d87bd9a2156df3b69fa6ffe81dfde01e4' 'SKIP')
+
+prepare() {
+  cd "$pkgname-$pkgver"
+  scripts/download_linux_jdk.sh
+}
+
+build() {
+  cd "$pkgname-$pkgver"
+  scripts/link_linux.sh
+  mvn package -DskipTests
+}
+
+package() {
+  mkdir -p "$pkgdir/usr/share/java"
+  mv "$pkgname-$pkgver/dist" "$pkgdir/usr/share/java/$pkgname"
+  install -Dm755 launcher.sh "$pkgdir/usr/bin/$pkgname"
+}

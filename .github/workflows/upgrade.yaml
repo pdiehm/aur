@@ -31,11 +31,9 @@ jobs:
 
       - name: Upgrade
         run: |
-          for pkg in */.nvchecker.toml; do
-            pkg="${pkg%/*}"
-            sudo -u user env -C "$pkg" pkgctl version upgrade
-            sudo -u user git add "$pkg/PKGBUILD"
-          done
+          PKGS=(*/.nvchecker.toml)
+          sudo -u user pkgctl version upgrade "${PKGS[@]%/*}"
+          sudo -u user git add */PKGBUILD
 
       - name: Publish
         env:

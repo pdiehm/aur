@@ -4,7 +4,6 @@ cmake-format cmake-language-server
 dockerfmt
 dynhostmgr
 google-java-format
-java-language-server
 nixd
 nixfmt
 nvim-plugins-pd

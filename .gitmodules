@@ -46,3 +46,6 @@
 [submodule "google-java-format"]
 	path = google-java-format
 	url = https://aur.archlinux.org/google-java-format.git
+[submodule "jdtls"]
+	path = jdtls
+	url = https://aur.archlinux.org/jdtls.git

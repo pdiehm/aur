@@ -1,12 +1,6 @@
 name: Build
 
 on:
-  workflow_dispatch:
-    inputs:
-      rebuild:
-        required: false
-        type: string
-
   push:
     branches: ["main"]
 
@@ -14,149 +8,64 @@ on:
     branches: ["main"]
 
   schedule:
-    - cron: "0 0 * * *"
+    - cron: 0 0 * * *
+
+  workflow_dispatch:
+    inputs:
+      rebuild:
+        type: string
+        required: false
 
 jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
 
-    container:
-      image: archlinux
-
     steps:
-      - name: Install Packages
-        run: pacman --noconfirm --sync --refresh --sysupgrade base-devel git
-
-      - uses: actions/checkout@v7.0.1
+      - name: Checkout
+        uses: actions/checkout@v7.0.0
         with:
           submodules: true
 
-      - name: Setup Environment
-        env:
-          GPG_KEY: ${{ secrets.GPG_KEY }}
-        run: |
-          useradd --create-home --home-dir /build --uid 1000 user
-          echo "user ALL=(ALL:ALL) NOPASSWD: ALL" >> /etc/sudoers
-          sudo -u user mkdir /build/repo
-          chown -R user:user .
-
-          if [[ $GPG_KEY ]]; then
-            pacman-key --init
-            sudo -u user gpg --import <<< "$GPG_KEY"
-            sudo -u user gpg --export "FE3A61A8A1C70F006D5718250AAB0BC4ED614894" | pacman-key --add -
-            pacman-key --lsign-key "FE3A61A8A1C70F006D5718250AAB0BC4ED614894"
-          fi
-
-          cat << EOF > /build/.makepkg.conf
-          PACKAGER="Pascal Diehm <pdiehm8@gmail.com>"
-          GPGKEY="FE3A61A8A1C70F006D5718250AAB0BC4ED614894"
-
-          PKGEXT=".pkg.tar.zst"
-          BUILDENV=(!distcc !color !ccache check sign)
-          OPTIONS=(strip docs !libtool !staticlibs emptydirs zipman purge !debug lto)
-
-          SRCDEST="/build/src"
-          PKGDEST="/build/pkgs"
-          BUILDDIR="/build/work"
-          EOF
-
-          if [[ ! $GPG_KEY ]]; then
-            sed -i "s/sign/!sign/" /build/.makepkg.conf
-            sed -i "s/^LocalFileSigLevel = .*/LocalFileSigLevel = Never/" /etc/pacman.conf
-          fi
-
-      - uses: actions/cache/restore@v6.1.0
+      - name: Restore Cache
+        uses: actions/cache/restore@v6.1.0
         with:
           key: pkgs-${{ github.run_id }}
+          path: ${{ runner.temp }}/pkgs
           restore-keys: pkgs
-          path: |
-            /build/pkgs
-            /var/cache/pacman/pkg
-
-      - name: Remove Stale Packages
-        if: ${{ inputs.rebuild }}
-        run: |
-          for pkg in ${{ inputs.rebuild }}; do
-            sudo -u user env -C "$pkg" makepkg --packagelist | while read -r pkg; do
-              rm -f "$pkg" "$pkg.sig"
-            done
-          done
 
       - name: Build Packages
-        run: |
-          echo "## Build times" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Package | Build time |" >> "$GITHUB_STEP_SUMMARY"
-          echo "| --- | --- |" >> "$GITHUB_STEP_SUMMARY"
+        uses: $/.github/actions/build
+        env:
+          GPG_KEY: ${{ secrets.GPG_KEY }}
+          REBUILD: ${{ inputs.rebuild }}
 
-          while read -ru 3 -a pkgs; do
-            for pkg in "${pkgs[@]}"; do
-              echo "::group::$pkg"
-              PRE="$(date "+%s")"
-
-              if [[ -f $pkg.patch ]]; then patch -d "$pkg" -p 1 < "$pkg.patch"; fi
-              if [[ $pkg == paru ]]; then CMD=(makepkg --noconfirm --syncdeps --install); else CMD=(paru --noconfirm --build --install .); fi
-              sudo -u user env -C "$pkg" "${CMD[@]}"
-
-              POST="$(date "+%s")"
-              echo "::endgroup::"
-
-              TIME="$((POST - PRE))"
-              printf "| %s | %dm %02ds |\n" "$pkg" "$((TIME / 60))" "$((TIME % 60))" >> "$GITHUB_STEP_SUMMARY"
-
-              sudo -u user env -C "$pkg" makepkg --packagelist | while read -r pkg; do
-                if [[ ! -f $pkg || ! -f $pkg.sig ]]; then continue; fi
-                sudo -u user touch "$pkg" "$pkg.sig"
-                sudo -u user cp "$pkg" "$pkg.sig" /build/repo
-              done
-            done
-          done 3< PKGS.txt
-
-      - name: Build Repository
+      - name: Save Cache
         if: github.ref_name == 'main'
-        run: sudo -u user repo-add --include-sigs --sign --key FE3A61A8A1C70F006D5718250AAB0BC4ED614894 /build/repo/aur.db.tar.gz /build/repo/*.pkg.tar.zst
-
-      - name: Print Summary
-        if: github.ref_name == 'main'
-        run: |
-          echo "## Packages" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Package | Size |" >> "$GITHUB_STEP_SUMMARY"
-          echo "| --- | --- |" >> "$GITHUB_STEP_SUMMARY"
-
-          ls -lh /build/repo/*.pkg.tar.zst | tail -n +2 | while read -r _ _ _ _ size _ _ _ file _; do
-            printf "| %s | %s |\n" "${file##*/}" "$size" >> "$GITHUB_STEP_SUMMARY"
-          done
-
-      - name: Clean Cache
-        if: github.ref_name == 'main'
-        run: |
-          find /build/pkgs -mindepth 1 -mtime +0 -delete
-          rmdir /var/cache/pacman/pkg/download-* # HACK: https://gitlab.archlinux.org/pacman/pacman/-/work_items/297
-          pacman --noconfirm --sync --clean
-
-      - uses: actions/cache/save@v6.1.0
-        if: github.ref_name == 'main'
+        uses: actions/cache/save@v6.1.0
         with:
           key: pkgs-${{ github.run_id }}
-          path: |
-            /build/pkgs
-            /var/cache/pacman/pkg
+          path: ${{ runner.temp }}/pkgs
 
-      - uses: actions/upload-pages-artifact@v5.0.0
+      - name: Upload Pages Artifact
         if: github.ref_name == 'main'
+        uses: actions/upload-pages-artifact@v5.0.0
         with:
-          path: /build/repo
+          path: ${{ runner.temp }}/repo
 
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
-    needs: build
     if: github.ref_name == 'main'
+    needs: build
 
     permissions:
       pages: write
       id-token: write
 
     steps:
-      - uses: actions/configure-pages@v6.0.0
-      - uses: actions/deploy-pages@v5.0.1
+      - name: Configure Pages
+        uses: actions/configure-pages@v6.0.0
+
+      - name: Deploy Pages
+        uses: actions/deploy-pages@v5.0.1

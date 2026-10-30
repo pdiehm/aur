@@ -1,0 +1,6 @@
+name: Build
+description: Build packages
+
+runs:
+  using: docker
+  image: Dockerfile

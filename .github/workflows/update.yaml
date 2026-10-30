@@ -1,0 +1,28 @@
+name: Update
+
+on:
+  schedule:
+    - cron: 0 0 * * 0
+
+jobs:
+  update:
+    name: Update
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7.0.0
+        with:
+          token: ${{ secrets.CI_TOKEN }}
+
+      - name: Update Packages
+        uses: $/.github/actions/update
+
+      - name: Update Dependencies
+        uses: pdiehm/actions/update@main
+
+      - name: Create Pull Request
+        uses: pdiehm/actions/pull-request@main
+        with:
+          token: ${{ secrets.CI_TOKEN }}
+          branch: ci/update

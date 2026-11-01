@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index e7b1c9e..016db94 100644
+index e7b1c9e..547819f 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -15,19 +15,22 @@ sha256sums=('25cdadefa4dc1649121d6eb1c315c4f75ee79e0dd165bf25a38878a7f46b0426'
@@ -7,7 +7,7 @@ index e7b1c9e..016db94 100644
              'f551327c1e5e87b9d33642a0644073f1987fb37ebd25387689b28c537f28395d')
  
 +_pkgver="$pkgver"
-+pkgver+="_$(pacman -Si nix | sed -En "s/^Version\s*: (.+)$/\1/p" | tr - .)"
++pkgver+="_$(pacman -Si nix | sed -n "s/^Version\s*: //p" | tr - .)"
 +
  prepare() {
 -  cd "$pkgname-$pkgver"

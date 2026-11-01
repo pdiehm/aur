@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index f0b9234..8eac1f1 100644
+index f0b9234..54f749d 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -16,8 +16,14 @@ checkdepends=("shellcheck")
@@ -13,7 +13,7 @@ index f0b9234..8eac1f1 100644
 +
  prepare() {
 -    cd ${pkgname}-${pkgver}
-+    cd "$pkgname-$_pkgver"
++    cd ${pkgname}-${_pkgver}
 +    patch -p 1 < ../pd.patch
  
      # GHC 9.6 doesn"t know about GHC2024 (remove when `ghc` gets updated)
@@ -23,7 +23,7 @@ index f0b9234..8eac1f1 100644
  
  build() {
 -    cd ${pkgname}-${pkgver}
-+    cd "$pkgname-$_pkgver"
++    cd ${pkgname}-${_pkgver}
  
      gen-setup
      runhaskell Setup configure -O \
@@ -39,7 +39,7 @@ index f0b9234..8eac1f1 100644
 -
  package() {
 -    cd ${pkgname}-${pkgver}
-+    cd "$pkgname-$_pkgver"
++    cd ${pkgname}-${_pkgver}
  
      install -Dm744 register.sh \
          "${pkgdir}"/usr/share/haskell/register/${pkgname}.sh

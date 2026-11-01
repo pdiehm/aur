@@ -1,10 +1,10 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 107d18f..608b034 100644
+index f0b9234..8eac1f1 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -12,8 +12,14 @@ makedepends=('ghc' 'uusi')
- source=("https://github.com/NixOS/$pkgname/archive/v$pkgver.tar.gz")
- b2sums=('524b10c7ba2ec9d6701370100d123e917d68f27a05e8d802030cfb5d5a205ba9aa3a070aaed863a76d4af0342a4d1d74c0aa4bbdf4f6e09bd3ea4128bd08ecbc')
+@@ -16,8 +16,14 @@ checkdepends=("shellcheck")
+ source=("${pkgname}-${pkgver}.tar.gz::${url}/archive/v${pkgver}.tar.gz")
+ b2sums=("524b10c7ba2ec9d6701370100d123e917d68f27a05e8d802030cfb5d5a205ba9aa3a070aaed863a76d4af0342a4d1d74c0aa4bbdf4f6e09bd3ea4128bd08ecbc")
  
 +_pkgver="$pkgver"
 +pkgver="$(date -I | tr - .)"
@@ -12,36 +12,37 @@ index 107d18f..608b034 100644
 +b2sums+=("SKIP")
 +
  prepare() {
--  cd $pkgname-$pkgver
-+  cd $pkgname-$_pkgver
-+  patch -p 1 < ../pd.patch
+-    cd ${pkgname}-${pkgver}
++    cd "$pkgname-$_pkgver"
++    patch -p 1 < ../pd.patch
  
-   # GHC 9.6 supports GHC2024's extensions, but not the edition alias.
-   sed -Ei 's/(default-language:[[:space:]]*)GHC2024/\1GHC2021/' $pkgname.cabal
-@@ -23,7 +29,7 @@ prepare() {
+     # GHC 9.6 doesn"t know about GHC2024 (remove when `ghc` gets updated)
+     sed -i "s/GHC2024/GHC2021/" $pkgname.cabal
+@@ -26,7 +32,7 @@ prepare() {
  }
  
  build() {
--  cd $pkgname-$pkgver
-+  cd $pkgname-$_pkgver
+-    cd ${pkgname}-${pkgver}
++    cd "$pkgname-$_pkgver"
  
-   gen-setup
-   runhaskell Setup configure -O --enable-shared --enable-executable-dynamic --disable-library-vanilla \
-@@ -40,12 +46,12 @@ build() {
+     gen-setup
+     runhaskell Setup configure -O \
+@@ -45,14 +51,8 @@ build() {
+     sed -i -r -e "s|ghc-pkg.*unregister[^ ]* |&"--force" |" unregister.sh
  }
  
- check() {
--  cd $pkgname-$pkgver
-+  cd $pkgname-$_pkgver
-   runhaskell Setup test
- }
- 
+-check() {
+-    cd ${pkgname}-${pkgver}
+-    LD_LIBRARY_PATH="$PWD/dist/build" PATH="$PWD/dist/build/$pkgname:$PATH" \
+-        test/test.sh
+-}
+-
  package() {
--  cd $pkgname-$pkgver
-+  cd $pkgname-$_pkgver
+-    cd ${pkgname}-${pkgver}
++    cd "$pkgname-$_pkgver"
  
-   install -D -m744 register.sh "$pkgdir"/usr/share/haskell/register/$pkgname.sh
-   install -D -m744 unregister.sh "$pkgdir"/usr/share/haskell/unregister/$pkgname.sh
+     install -Dm744 register.sh \
+         "${pkgdir}"/usr/share/haskell/register/${pkgname}.sh
 diff --git a/pd.patch b/pd.patch
 new file mode 100644
 index 0000000..6837dc8

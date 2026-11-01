@@ -49,3 +49,6 @@
 [submodule "jdtls"]
 	path = jdtls
 	url = https://aur.archlinux.org/jdtls.git
+[submodule "neovim"]
+	path = neovim
+	url = https://gitlab.archlinux.org/archlinux/packaging/packages/neovim.git

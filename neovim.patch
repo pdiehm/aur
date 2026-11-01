@@ -1,0 +1,45 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index c350bfa..eb0bb65 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -60,6 +60,14 @@ sha512sums=('8306453602859b5d5d664e10d007f6d0edcd8be2c03e9e4767ae32e66e84e7e4611
+             '22662462c823de243599cdd3483e46ade4ab59b219e907468d34c18e584fe7477548e357ee2ce56bb098cf54b770b108a3511703dd486f0774a65c84af78f6aa'
+             '3c6ee1e4646d09c164a2212f9e4d2f53158ff32911b0972e060a395a8d4685334574a7ede995a81680dcc0750cd3327a78beb7904a4bb326b2399d79a8b12d5e')
+ 
++source+=("pd.patch")
++sha512sums+=("SKIP")
++
++prepare() {
++  cd "$pkgname"
++  patch -p 1 < ../pd.patch
++}
++
+ build() {
+   local cmake_options=(
+     -B build
+diff --git a/pd.patch b/pd.patch
+new file mode 100644
+index 0000000..160958f
+--- /dev/null
++++ b/pd.patch
+@@ -0,0 +1,20 @@
++diff --git a/src/nvim/clipboard.c b/src/nvim/clipboard.c
++index 991b20986b..0a4f5f04d2 100644
++--- a/src/nvim/clipboard.c
+++++ b/src/nvim/clipboard.c
++@@ -7,6 +7,7 @@
++ #include "nvim/clipboard.h"
++ #include "nvim/eval.h"
++ #include "nvim/eval/typval.h"
+++#include "nvim/globals.h"
++ #include "nvim/option_vars.h"
++ #include "nvim/register.h"
++ 
++@@ -36,6 +37,7 @@ yankreg_T *adjust_clipboard_name(int *name, bool quiet, bool writing)
++   yankreg_T *target = NULL;
++   bool explicit_cb_reg = (*name == '*' || *name == '+');
++   bool implicit_cb_reg = (*name == NUL) && (cb_flags & (kOptCbFlagUnnamed | kOptCbFlagUnnamedplus));
+++  if(reg_executing) goto end;
++   if (!explicit_cb_reg && !implicit_cb_reg) {
++     goto end;
++   }
